@@ -35,7 +35,6 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 const hamburger = document.querySelector('.hamburger');
 const navLinks = document.querySelector('.nav-links');
 const overlay = document.querySelector('.drawer-overlay');
-const closeButton = document.querySelector('.drawer-close');
 let closeMenu = null;
 let openMenu = null;
 if (hamburger && navLinks) {
@@ -67,7 +66,6 @@ if (hamburger && navLinks) {
 
     // Close menu when clicking overlay
     overlay?.addEventListener('click', closeMenu);
-    closeButton?.addEventListener('click', closeMenu);
 
     // Close menu on ESC key
     document.addEventListener('keydown', (e) => {
