@@ -35,6 +35,12 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 const hamburger = document.querySelector('.hamburger');
 const navLinks = document.querySelector('.nav-links');
 if (hamburger && navLinks) {
+    const closeMenu = () => {
+        navLinks.classList.remove('active');
+        hamburger.classList.remove('active');
+        hamburger.setAttribute('aria-expanded', 'false');
+    };
+
     hamburger.addEventListener('click', () => {
         const isActive = navLinks.classList.toggle('active');
         hamburger.setAttribute('aria-expanded', isActive ? 'true' : 'false');
@@ -43,11 +49,21 @@ if (hamburger && navLinks) {
 
     // Close mobile menu when clicking on a link
     document.querySelectorAll('.nav-links a').forEach(link => {
-        link.addEventListener('click', () => {
-            navLinks.classList.remove('active');
-            hamburger.classList.remove('active');
-            hamburger.setAttribute('aria-expanded', 'false');
-        });
+        link.addEventListener('click', closeMenu);
+    });
+
+    // Close menu when clicking overlay (behind the drawer)
+    navLinks.addEventListener('click', (e) => {
+        if (e.target === navLinks || (e.target.tagName === 'STYLE' && e.target.parentElement === navLinks)) {
+            closeMenu();
+        }
+    });
+
+    // Close menu on ESC key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && navLinks.classList.contains('active')) {
+            closeMenu();
+        }
     });
 }
 
