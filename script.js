@@ -36,15 +36,17 @@ const hamburger = document.querySelector('.hamburger');
 const navLinks = document.querySelector('.nav-links');
 const overlay = document.querySelector('.drawer-overlay');
 const closeButton = document.querySelector('.drawer-close');
+let closeMenu = null;
+let openMenu = null;
 if (hamburger && navLinks) {
-    const closeMenu = () => {
+    closeMenu = () => {
         navLinks.classList.remove('active');
         overlay?.classList.remove('active');
         hamburger.classList.remove('active');
         hamburger.setAttribute('aria-expanded', 'false');
     };
 
-    const openMenu = () => {
+    openMenu = () => {
         navLinks.classList.add('active');
         overlay?.classList.add('active');
         hamburger.classList.add('active');
@@ -81,6 +83,9 @@ const handleNavbarCompact = () => {
     if (!navbar) return;
     const shouldCompact = window.scrollY > 120;
     navbar.classList.toggle('compact', shouldCompact);
+    if (shouldCompact && navLinks?.classList.contains('active')) {
+        closeMenu();
+    }
 };
 window.addEventListener('scroll', handleNavbarCompact);
 window.addEventListener('load', handleNavbarCompact);
