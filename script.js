@@ -34,15 +34,26 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 // Mobile menu toggle
 const hamburger = document.querySelector('.hamburger');
 const navLinks = document.querySelector('.nav-links');
+const overlay = document.querySelector('.drawer-overlay');
+const closeButton = document.querySelector('.drawer-close');
 if (hamburger && navLinks) {
     const closeMenu = () => {
         navLinks.classList.remove('active');
+        overlay?.classList.remove('active');
         hamburger.classList.remove('active');
         hamburger.setAttribute('aria-expanded', 'false');
     };
 
+    const openMenu = () => {
+        navLinks.classList.add('active');
+        overlay?.classList.add('active');
+        hamburger.classList.add('active');
+        hamburger.setAttribute('aria-expanded', 'true');
+    };
+
     hamburger.addEventListener('click', () => {
         const isActive = navLinks.classList.toggle('active');
+        overlay?.classList.toggle('active', isActive);
         hamburger.setAttribute('aria-expanded', isActive ? 'true' : 'false');
         hamburger.classList.toggle('active', isActive);
     });
@@ -52,12 +63,9 @@ if (hamburger && navLinks) {
         link.addEventListener('click', closeMenu);
     });
 
-    // Close menu when clicking overlay (behind the drawer)
-    navLinks.addEventListener('click', (e) => {
-        if (e.target === navLinks || (e.target.tagName === 'STYLE' && e.target.parentElement === navLinks)) {
-            closeMenu();
-        }
-    });
+    // Close menu when clicking overlay
+    overlay?.addEventListener('click', closeMenu);
+    closeButton?.addEventListener('click', closeMenu);
 
     // Close menu on ESC key
     document.addEventListener('keydown', (e) => {
@@ -67,17 +75,15 @@ if (hamburger && navLinks) {
     });
 }
 
-// Navbar background change on scroll
-window.addEventListener('scroll', () => {
-    const navbar = document.querySelector('.navbar');
-    if (window.scrollY > 100) {
-        navbar.style.background = 'rgba(255, 255, 255, 0.98)';
-        navbar.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.1)';
-    } else {
-        navbar.style.background = 'rgba(255, 255, 255, 0.95)';
-        navbar.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
-    }
-});
+// Navbar compact mode on scroll
+const navbar = document.querySelector('.navbar');
+const handleNavbarCompact = () => {
+    if (!navbar) return;
+    const shouldCompact = window.scrollY > 120;
+    navbar.classList.toggle('compact', shouldCompact);
+};
+window.addEventListener('scroll', handleNavbarCompact);
+window.addEventListener('load', handleNavbarCompact);
 
 // Animate elements on scroll
 const observerOptions = {
