@@ -141,6 +141,7 @@ if (bookingForm) {
     const costEstimationContent = document.getElementById('costEstimationContent');
     const onlineServiceInfo = document.getElementById('onlineServiceInfo');
     const offlineServiceInfo = document.getElementById('offlineServiceInfo');
+    const detailGroup = document.getElementById('detailGroup');
     const onlineAddressGroup = document.getElementById('onlineAddressGroup');
     const offlineAddressGroup = document.getElementById('offlineAddressGroup');
     const paymentMethodGroup = document.getElementById('paymentMethodGroup');
@@ -193,6 +194,8 @@ if (bookingForm) {
         // Reset payment selection
         document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => radio.checked = false);
 
+        detailGroup.classList.toggle('hidden', !selectedMethod);
+
         if (selectedMethod === 'online') {
             // Show online-specific elements
             onlineServiceInfo.classList.remove('hidden');
@@ -217,6 +220,15 @@ if (bookingForm) {
             // Set offline required fields
             document.getElementById('alamat').setAttribute('required', '');
             document.getElementById('gmapsLink').setAttribute('required', '');
+        } else {
+            // Hide all method-specific sections until a method is chosen
+            onlineServiceInfo.classList.add('hidden');
+            offlineServiceInfo.classList.add('hidden');
+            onlineAddressGroup.classList.add('hidden');
+            offlineAddressGroup.classList.add('hidden');
+            paymentMethodGroup.classList.add('hidden');
+            paymentDetailsDisplay.classList.add('hidden');
+            bookingSummary.classList.add('hidden');
         }
 
         updateCostEstimation();
