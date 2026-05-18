@@ -18,25 +18,58 @@ function showMessage(message, type) {
         alert(message);
     }
 }
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-            target.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
-            });
-        }
+
+// Smooth scroll untuk semua anchor links (desktop & mobile)
+function setupSmoothScroll() {
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            const href = this.getAttribute('href');
+            
+            // Skip jika href hanya "#"
+            if (href === '#') return;
+            
+            const target = document.querySelector(href);
+            if (!target) return;
+            
+            e.preventDefault();
+            
+            // Tutup drawer jika terbuka
+            const navLinks = document.querySelector('.nav-links');
+            const overlay = document.querySelector('.drawer-overlay');
+            const hamburger = document.querySelector('.hamburger');
+            
+            const closeDrawer = () => {
+                if (navLinks?.classList.contains('active')) {
+                    navLinks.classList.remove('active');
+                    overlay?.classList.remove('active');
+                    hamburger?.classList.remove('active');
+                    hamburger?.setAttribute('aria-expanded', 'false');
+                }
+            };
+            
+            // Scroll ke target
+            const scrollToTarget = () => {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            };
+            
+            closeDrawer();
+            setTimeout(scrollToTarget, 50);
+        });
     });
-});
+}
+
+// Panggil setup saat DOM ready
+document.addEventListener('DOMContentLoaded', setupSmoothScroll);
 
 // Mobile menu toggle
 const hamburger = document.querySelector('.hamburger');
 const navLinks = document.querySelector('.nav-links');
 const overlay = document.querySelector('.drawer-overlay');
 let closeMenu = null;
-let openMenu = null;
+
 if (hamburger && navLinks) {
     closeMenu = () => {
         navLinks.classList.remove('active');
@@ -45,29 +78,19 @@ if (hamburger && navLinks) {
         hamburger.setAttribute('aria-expanded', 'false');
     };
 
-    openMenu = () => {
-        navLinks.classList.add('active');
-        overlay?.classList.add('active');
-        hamburger.classList.add('active');
-        hamburger.setAttribute('aria-expanded', 'true');
-    };
-
-    hamburger.addEventListener('click', () => {
+    // Toggle drawer saat hamburger diklik
+    hamburger.addEventListener('click', (e) => {
+        e.stopPropagation();
         const isActive = navLinks.classList.toggle('active');
         overlay?.classList.toggle('active', isActive);
-        hamburger.setAttribute('aria-expanded', isActive ? 'true' : 'false');
         hamburger.classList.toggle('active', isActive);
+        hamburger.setAttribute('aria-expanded', isActive ? 'true' : 'false');
     });
 
-    // Close mobile menu when clicking on a link
-    document.querySelectorAll('.nav-links a').forEach(link => {
-        link.addEventListener('click', closeMenu);
-    });
-
-    // Close menu when clicking overlay
+    // Tutup drawer saat overlay diklik
     overlay?.addEventListener('click', closeMenu);
 
-    // Close menu on ESC key
+    // Tutup drawer saat tombol ESC ditekan
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && navLinks.classList.contains('active')) {
             closeMenu();
@@ -81,7 +104,7 @@ const handleNavbarCompact = () => {
     if (!navbar) return;
     const shouldCompact = window.scrollY > 120;
     navbar.classList.toggle('compact', shouldCompact);
-    if (shouldCompact && navLinks?.classList.contains('active')) {
+    if (shouldCompact && navLinks?.classList.contains('active') && typeof closeMenu === 'function') {
         closeMenu();
     }
 };
@@ -108,13 +131,147 @@ document.querySelectorAll('.service-card, .testimonial-card, .contact-card, .hig
     observer.observe(el);
 });
 
-// Booking form submission with Firebase Realtime Database
+// Booking form handling with dynamic features
 const bookingForm = document.getElementById('bookingForm');
 if (bookingForm) {
+    // Get form elements
+    const serviceSelect = document.getElementById('service');
+    const serviceMethodRadios = document.querySelectorAll('input[name="serviceMethod"]');
+    const paymentMethodRadios = document.querySelectorAll('input[name="paymentMethod"]');
+    const costEstimationContent = document.getElementById('costEstimationContent');
+    const onlineServiceInfo = document.getElementById('onlineServiceInfo');
+    const offlineServiceInfo = document.getElementById('offlineServiceInfo');
+    const onlineAddressGroup = document.getElementById('onlineAddressGroup');
+    const offlineAddressGroup = document.getElementById('offlineAddressGroup');
+    const paymentMethodGroup = document.getElementById('paymentMethodGroup');
+    const paymentDetailsDisplay = document.getElementById('paymentDetailsDisplay');
+    const danaPaymentDetails = document.getElementById('danaPaymentDetails');
+    const qrisPaymentDetails = document.getElementById('qrisPaymentDetails');
+    const bookingSummary = document.getElementById('bookingSummary');
+    const summaryMethod = document.getElementById('summaryMethod');
+    const summaryPaymentItem = document.getElementById('summaryPaymentItem');
+    const summaryPayment = document.getElementById('summaryPayment');
+
+    // Service prices
+    const servicePrices = {
+        'konsultasi-it': 150000,
+        'instalasi-software': 200000,
+        'perbaikan-ringan': 250000,
+        'setup-dasar': 180000
+    };
+
+    // Update cost estimation
+    function updateCostEstimation() {
+        const selectedService = serviceSelect.value;
+        const selectedMethod = document.querySelector('input[name="serviceMethod"]:checked')?.value;
+
+        if (!selectedService) {
+            costEstimationContent.innerHTML = '<p class="info-text">Pilih metode layanan untuk melihat estimasi biaya.</p>';
+            return;
+        }
+
+        const basePrice = servicePrices[selectedService];
+        let html = `<div class="cost-item">
+            <span class="cost-item-name">Harga Dasar</span>
+            <span class="cost-item-price">Mulai dari Rp${basePrice.toLocaleString('id-ID')}</span>
+        </div>`;
+
+        if (selectedMethod === 'offline') {
+            html += `<div class="cost-item">
+                <span class="cost-item-name">Biaya Kunjungan</span>
+                <span class="cost-item-price">Tergantung lokasi</span>
+            </div>`;
+        }
+
+        costEstimationContent.innerHTML = html;
+    }
+
+    // Toggle visibility based on service method
+    function updateServiceMethodUI() {
+        const selectedMethod = document.querySelector('input[name="serviceMethod"]:checked')?.value;
+
+        // Reset payment selection
+        document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => radio.checked = false);
+
+        if (selectedMethod === 'online') {
+            // Show online-specific elements
+            onlineServiceInfo.classList.remove('hidden');
+            offlineServiceInfo.classList.add('hidden');
+            onlineAddressGroup.classList.remove('hidden');
+            offlineAddressGroup.classList.add('hidden');
+            paymentMethodGroup.classList.remove('hidden');
+            paymentDetailsDisplay.classList.add('hidden');
+
+            // Reset offline required fields
+            document.getElementById('alamat').removeAttribute('required');
+            document.getElementById('gmapsLink').removeAttribute('required');
+        } else if (selectedMethod === 'offline') {
+            // Show offline-specific elements
+            onlineServiceInfo.classList.add('hidden');
+            offlineServiceInfo.classList.remove('hidden');
+            onlineAddressGroup.classList.add('hidden');
+            offlineAddressGroup.classList.remove('hidden');
+            paymentMethodGroup.classList.add('hidden');
+            paymentDetailsDisplay.classList.add('hidden');
+
+            // Set offline required fields
+            document.getElementById('alamat').setAttribute('required', '');
+            document.getElementById('gmapsLink').setAttribute('required', '');
+        }
+
+        updateCostEstimation();
+        updateBookingSummary();
+    }
+
+    // Handle payment method selection
+    function handlePaymentMethodChange() {
+        const selectedPayment = document.querySelector('input[name="paymentMethod"]:checked')?.value;
+
+        paymentDetailsDisplay.classList.toggle('hidden', !selectedPayment);
+        danaPaymentDetails.classList.toggle('hidden', selectedPayment !== 'dana');
+        qrisPaymentDetails.classList.toggle('hidden', selectedPayment !== 'qris');
+
+        updateBookingSummary();
+    }
+
+    // Update booking summary
+    function updateBookingSummary() {
+        const selectedMethod = document.querySelector('input[name="serviceMethod"]:checked')?.value;
+        const selectedPayment = document.querySelector('input[name="paymentMethod"]:checked')?.value;
+
+        if (!selectedMethod) {
+            bookingSummary.classList.add('hidden');
+            return;
+        }
+
+        bookingSummary.classList.remove('hidden');
+        summaryMethod.textContent = selectedMethod === 'online' ? 'Online (Video Call / Chat)' : 'Offline (Kunjungan Langsung)';
+
+        if (selectedMethod === 'online' && selectedPayment) {
+            summaryPaymentItem.classList.remove('hidden');
+            summaryPayment.textContent = selectedPayment === 'dana' ? 'DANA' : 'QRIS';
+        } else {
+            summaryPaymentItem.classList.add('hidden');
+        }
+    }
+
+    // Event listeners
+    serviceSelect.addEventListener('change', updateCostEstimation);
+
+    serviceMethodRadios.forEach(radio => {
+        radio.addEventListener('change', updateServiceMethodUI);
+    });
+
+    paymentMethodRadios.forEach(radio => {
+        radio.addEventListener('change', handlePaymentMethodChange);
+    });
+
+    // Form submission
     bookingForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const submitBtn = e.target.querySelector('button[type="submit"]') || e.target.querySelector('.btn-primary');
         const originalText = submitBtn ? submitBtn.textContent : 'Kirim';
+
         if (submitBtn) {
             submitBtn.textContent = 'Mengirim...';
             submitBtn.disabled = true;
@@ -125,22 +282,52 @@ if (bookingForm) {
         const phone = (formData.get('phone') || '').trim();
         const service = (formData.get('service') || '').trim();
         const keluhan = (formData.get('keluhan') || '').trim();
-        const alamat = (formData.get('alamat') || '').trim();
+        const serviceMethod = (formData.get('serviceMethod') || '').trim();
+        const paymentMethod = (formData.get('paymentMethod') || '').trim();
 
-        if (!nama || !phone || !service || !keluhan) {
+        // Validate required fields
+        if (!nama || !phone || !service || !keluhan || !serviceMethod) {
             showMessage('Silakan isi semua field wajib sebelum mengirim.', 'error');
             if (submitBtn) { submitBtn.textContent = originalText; submitBtn.disabled = false; }
             return;
         }
 
+        // Validate method-specific required fields
+        if (serviceMethod === 'offline') {
+            const alamat = (formData.get('alamat') || '').trim();
+            const gmapsLink = (formData.get('gmapsLink') || '').trim();
+
+            if (!alamat || !gmapsLink) {
+                showMessage('Untuk layanan Offline, alamat lengkap dan link Google Maps harus diisi.', 'error');
+                if (submitBtn) { submitBtn.textContent = originalText; submitBtn.disabled = false; }
+                return;
+            }
+        }
+
+        if (serviceMethod === 'online' && !paymentMethod) {
+            showMessage('Untuk layanan Online, pilih metode pembayaran.', 'error');
+            if (submitBtn) { submitBtn.textContent = originalText; submitBtn.disabled = false; }
+            return;
+        }
+
+        // Build booking data
         const bookingData = {
             nama,
             phone,
             service,
             keluhan,
-            alamat: alamat || '',
+            serviceMethod,
             timestamp: new Date().toISOString()
         };
+
+        // Add optional/conditional fields
+        if (serviceMethod === 'offline') {
+            bookingData.alamat = (formData.get('alamat') || '').trim();
+            bookingData.gmapsLink = (formData.get('gmapsLink') || '').trim();
+        } else {
+            bookingData.alamatOnline = (formData.get('alamatOnline') || '').trim();
+            bookingData.paymentMethod = paymentMethod;
+        }
 
         try {
             if (typeof window.firebaseDatabase !== 'undefined' && typeof window.firebaseRef === 'function') {
@@ -148,8 +335,10 @@ if (bookingForm) {
                 const newBookingRef = window.firebasePush(bookingsRef);
                 await window.firebaseSet(newBookingRef, bookingData);
 
-                showMessage('Booking berhasil dikirim. Tim akan menghubungi Anda.', 'success');
+                showMessage('Booking berhasil dikirim. Tim akan menghubungi Anda segera.', 'success');
                 e.target.reset();
+                // Reset UI
+                updateServiceMethodUI();
             } else {
                 showMessage('Firebase belum terhubung. Periksa konfigurasi.', 'error');
             }
@@ -161,6 +350,7 @@ if (bookingForm) {
         }
     });
 }
+
 
 // Contact form submission (basic - optional)
 const contactForm = document.getElementById('contactForm');

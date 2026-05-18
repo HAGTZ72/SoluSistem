@@ -378,9 +378,364 @@ textarea:focus-visible,
     margin-top: 10px;
 }
 
-.testimonial-card {
-    padding: 32px;
+/* New Booking Form Styles */
+.booking-wrapper {
+    max-width: 720px;
+    margin: 0 auto;
 }
+
+.booking-info-box {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(59, 130, 246, 0.06) 100%);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.cost-estimation h3 {
+    color: #1d4ed8;
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cost-content {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    border-left: 4px solid #2563eb;
+}
+
+.cost-content .cost-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.cost-content .cost-item:last-child {
+    border-bottom: none;
+}
+
+.cost-item-name {
+    font-weight: 500;
+    color: #0f172a;
+}
+
+.cost-item-price {
+    color: #2563eb;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.info-text {
+    color: #64748b;
+    font-size: 0.95rem;
+}
+
+.cost-note {
+    font-size: 0.85rem;
+    color: #64748b;
+    background: rgba(100, 116, 139, 0.05);
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 12px;
+}
+
+/* Radio Group Styles */
+.radio-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.radio-option {
+    position: relative;
+    cursor: pointer;
+}
+
+.radio-option input[type="radio"] {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    cursor: pointer;
+    opacity: 0;
+}
+
+.radio-label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 16px;
+    background: #f8fafc;
+    border: 2px solid #cbd5e1;
+    border-radius: 12px;
+    transition: all 0.25s ease;
+    cursor: pointer;
+}
+
+.radio-label i {
+    font-size: 1.2rem;
+    color: #64748b;
+}
+
+.radio-label small {
+    font-size: 0.8rem;
+    color: #64748b;
+    font-weight: 400;
+}
+
+.radio-option input[type="radio"]:checked + .radio-label {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.12) 0%, rgba(59, 130, 246, 0.08) 100%);
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+}
+
+.radio-option input[type="radio"]:checked + .radio-label i {
+    color: #2563eb;
+}
+
+/* Service Info Box */
+.service-info-box {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(74, 222, 128, 0.06) 100%);
+    border-left: 4px solid #22c55e;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin: 16px 0;
+    font-size: 0.95rem;
+    color: #15803d;
+}
+
+.service-info-box.hidden {
+    display: none;
+}
+
+.info-icon {
+    margin-right: 6px;
+    color: #22c55e;
+}
+
+/* Form Group Section */
+.form-group-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.form-group-section.hidden {
+    display: none;
+}
+
+/* Required Label */
+.required {
+    color: #dc2626;
+    font-weight: bold;
+}
+
+.form-hint {
+    display: block;
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-top: 6px;
+}
+
+/* Payment Options */
+.payment-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.payment-option {
+    position: relative;
+    cursor: pointer;
+}
+
+.payment-option input[type="radio"] {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    cursor: pointer;
+    opacity: 0;
+}
+
+.payment-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px;
+    background: #f8fafc;
+    border: 2px solid #cbd5e1;
+    border-radius: 12px;
+    transition: all 0.25s ease;
+    cursor: pointer;
+    text-align: center;
+}
+
+.payment-label i {
+    font-size: 1.5rem;
+    color: #64748b;
+}
+
+.payment-option input[type="radio"]:checked + .payment-label {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.12) 0%, rgba(59, 130, 246, 0.08) 100%);
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+}
+
+.payment-option input[type="radio"]:checked + .payment-label i {
+    color: #2563eb;
+}
+
+.payment-info {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(59, 130, 246, 0.06) 100%);
+    border-left: 4px solid #2563eb;
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-top: 12px;
+    font-size: 0.9rem;
+    color: #1d4ed8;
+}
+
+/* Payment Details Box */
+.payment-details-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 20px;
+    margin-top: 16px;
+}
+
+.payment-details-box.hidden {
+    display: none;
+}
+
+.payment-detail-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.payment-detail-section.hidden {
+    display: none;
+}
+
+.payment-detail-section h4 {
+    color: #1d4ed8;
+    font-size: 1rem;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.payment-detail-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: #ffffff;
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+.payment-number {
+    font-size: 0.95rem;
+    color: #0f172a;
+}
+
+.payment-number span {
+    font-family: 'Courier New', monospace;
+    background: #f1f5f9;
+    padding: 4px 8px;
+    border-radius: 6px;
+    color: #1d4ed8;
+    font-weight: 700;
+}
+
+.payment-instruction {
+    font-size: 0.9rem;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+.payment-instruction-small {
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+.qris-display {
+    text-align: center;
+    padding: 16px;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 2px dashed #cbd5e1;
+}
+
+.qris-code {
+    width: 100%;
+    max-width: 240px;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+}
+
+/* Booking Summary */
+.booking-summary {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(59, 130, 246, 0.06) 100%);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 16px;
+    margin-bottom: 16px;
+}
+
+.booking-summary.hidden {
+    display: none;
+}
+
+.booking-summary h4 {
+    color: #1d4ed8;
+    font-size: 0.95rem;
+    margin-bottom: 12px;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 0.9rem;
+    color: #64748b;
+    border-bottom: 1px solid rgba(59, 130, 246, 0.15);
+}
+
+.summary-item:last-child {
+    border-bottom: none;
+}
+
+.summary-item strong {
+    color: #1d4ed8;
+    font-weight: 600;
+}
+
+.summary-item.hidden {
+    display: none;
+}
+
+
 
 .client-info {
     display: flex;
@@ -655,19 +1010,25 @@ html {
 .drawer-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(15, 23, 42, 0.46);
+    background: rgba(15, 23, 42, 0.3);
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.35s ease, visibility 0.35s ease;
     z-index: 1000;
+    pointer-events: none;
 }
 
 .drawer-overlay.active {
     opacity: 1;
     visibility: visible;
+    pointer-events: auto;
 }
 
 @media (max-width: 1024px) {
+    .booking-wrapper {
+        max-width: 100%;
+    }
+
     .hero-wrapper,
     .about-wrapper {
         grid-template-columns: 1fr;
@@ -722,16 +1083,18 @@ html {
     .drawer-overlay {
         position: fixed;
         inset: 0;
-        background: rgba(15, 23, 42, 0.46);
+        background: rgba(15, 23, 42, 0.3);
         opacity: 0;
         visibility: hidden;
         transition: opacity 0.35s ease, visibility 0.35s ease;
         z-index: 1000;
+        pointer-events: none;
     }
 
     .drawer-overlay.active {
         opacity: 1;
         visibility: visible;
+        pointer-events: auto;
     }
 
     .nav-links li {
@@ -897,6 +1260,19 @@ html {
     .form-group select,
     .form-group textarea {
         padding: 14px;
+    }
+
+    .radio-group,
+    .payment-options {
+        grid-template-columns: 1fr;
+    }
+
+    .booking-info-box {
+        padding: 16px;
+    }
+
+    .qris-code {
+        max-width: 160px;
     }
 
     .client-info {

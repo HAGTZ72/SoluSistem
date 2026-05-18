@@ -50,7 +50,7 @@
                 <li><a href="#contact">Kontak</a></li>
             </ul>
             <button class="hamburger" type="button" aria-label="Buka menu drawer" aria-expanded="false">
-                <img src="assets/Logo SoluSistem.jpeg" alt="Menu drawer logo" class="hamburger-logo">
+                <img src="assets/Logo Drawer.jpeg" alt="Menu drawer logo" class="hamburger-logo">
             </button>
         </div>
     </nav>
@@ -136,37 +136,156 @@
                 <p>Isi data di bawah ini dan tim kami akan segera menghubungi Anda.</p>
             </div>
             <div id="messageContainer"></div>
-            <form id="bookingForm" class="booking-form">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="nama">Nama Lengkap</label>
-                        <input type="text" id="nama" name="nama" required placeholder="Budi Santoso">
+            <div class="booking-wrapper">
+                <!-- Cost Estimation Info -->
+                <div class="booking-info-box">
+                    <div class="cost-estimation">
+                        <h3><i class="fas fa-info-circle"></i> Estimasi Biaya</h3>
+                        <div id="costEstimationContent" class="cost-content">
+                            <p class="info-text">Pilih metode layanan untuk melihat estimasi biaya.</p>
+                        </div>
+                        <p class="cost-note"><small><i class="fas fa-note-sticky"></i> <em>Biaya akhir dapat menyesuaikan dengan tingkat kesulitan layanan dan jarak lokasi.</em></small></p>
                     </div>
-                    <div class="form-group">
-                        <label for="phone">Nomor HP</label>
-                        <input type="tel" id="phone" name="phone" required placeholder="Misal:085762779405">
+                </div>
+
+                <form id="bookingForm" class="booking-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nama">Nama Lengkap</label>
+                            <input type="text" id="nama" name="nama" required placeholder="Budi Santoso">
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Nomor HP</label>
+                            <input type="tel" id="phone" name="phone" required placeholder="Misal: 085762779405">
+                        </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label for="service">Jenis Layanan</label>
-                    <select id="service" name="service" required>
-                        <option value="">Pilih layanan</option>
-                        <option value="konsultasi-it">Konsultasi IT</option>
-                        <option value="instalasi-software">Instalasi Software</option>
-                        <option value="perbaikan-ringan">Perbaikan Ringan</option>
-                        <option value="setup-dasar">Setup Dasar</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="keluhan">Keluhan / Keterangan</label>
-                    <textarea id="keluhan" name="keluhan" rows="4" required placeholder="Jelaskan masalah atau kebutuhan Anda"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="alamat">Alamat Lengkap (opsional)</label>
-                    <input type="text" id="alamat" name="alamat" placeholder="Jl. Merdeka No. 10, Jakarta">
-                </div>
-                <button type="submit" class="btn-primary">Kirim Booking</button>
-            </form>
+
+                    <div class="form-group">
+                        <label for="service">Jenis Layanan</label>
+                        <select id="service" name="service" required>
+                            <option value="">Pilih layanan</option>
+                            <option value="konsultasi-it" data-price="150000">Konsultasi IT - Mulai dari Rp150.000</option>
+                            <option value="instalasi-software" data-price="200000">Instalasi Software - Mulai dari Rp200.000</option>
+                            <option value="perbaikan-ringan" data-price="250000">Perbaikan Ringan - Mulai dari Rp250.000</option>
+                            <option value="setup-dasar" data-price="180000">Setup Dasar - Mulai dari Rp180.000</option>
+                        </select>
+                    </div>
+
+                    <!-- Service Method Selection -->
+                    <div class="form-group">
+                        <label>Metode Layanan</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="serviceMethod" value="online" required>
+                                <span class="radio-label">
+                                    <i class="fas fa-video"></i> Online
+                                    <small>Video call, chat, atau pendampingan jarak jauh</small>
+                                </span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="serviceMethod" value="offline" required>
+                                <span class="radio-label">
+                                    <i class="fas fa-building"></i> Offline
+                                    <small>Kunjungan langsung ke lokasi Anda</small>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Online Service Info -->
+                    <div id="onlineServiceInfo" class="service-info-box hidden">
+                        <p><i class="fas fa-info-circle info-icon"></i> Layanan online dilakukan melalui <strong>video call, chat, atau pendampingan jarak jauh</strong>. Tim kami siap membantu menyelesaikan masalah Anda dari mana saja.</p>
+                    </div>
+
+                    <!-- Offline Service Info -->
+                    <div id="offlineServiceInfo" class="service-info-box hidden">
+                        <p><i class="fas fa-info-circle info-icon"></i> Layanan offline mencakup <strong>kunjungan langsung</strong> ke lokasi Anda. Tim kami akan hadir untuk memastikan solusi yang tepat.</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="keluhan">Keluhan / Keterangan</label>
+                        <textarea id="keluhan" name="keluhan" rows="4" required placeholder="Jelaskan masalah atau kebutuhan Anda"></textarea>
+                    </div>
+
+                    <!-- Address Group (Offline) -->
+                    <div id="offlineAddressGroup" class="form-group-section hidden">
+                        <div class="form-group">
+                            <label for="alamat">Alamat Lengkap <span class="required">*</span></label>
+                            <input type="text" id="alamat" name="alamat" placeholder="Jl. Merdeka No. 10, Jakarta">
+                        </div>
+                        <div class="form-group">
+                            <label for="gmapsLink">Link Google Maps / Lokasi <span class="required">*</span></label>
+                            <input type="url" id="gmapsLink" name="gmapsLink" placeholder="Contoh: https://maps.app.goo.gl/...">
+                            <small class="form-hint"><i class="fas fa-question-circle"></i> Salin link dari Google Maps agar tim dapat menemukan lokasi Anda dengan akurat.</small>
+                        </div>
+                    </div>
+
+                    <!-- Address Optional (Online) -->
+                    <div id="onlineAddressGroup" class="form-group hidden">
+                        <label for="alamatOnline">Alamat (Opsional)</label>
+                        <input type="text" id="alamatOnline" name="alamatOnline" placeholder="Tidak diperlukan untuk layanan online, namun bisa ditambahkan jika perlu">
+                    </div>
+
+                    <!-- Payment Method (Online Only) -->
+                    <div id="paymentMethodGroup" class="form-group-section hidden">
+                        <label>Metode Pembayaran</label>
+                        <div class="payment-options">
+                            <label class="payment-option">
+                                <input type="radio" name="paymentMethod" value="dana">
+                                <span class="payment-label">
+                                    <i class="fas fa-mobile-alt"></i> DANA
+                                </span>
+                            </label>
+                            <label class="payment-option">
+                                <input type="radio" name="paymentMethod" value="qris">
+                                <span class="payment-label">
+                                    <i class="fas fa-qrcode"></i> QRIS
+                                </span>
+                            </label>
+                        </div>
+                        <p class="payment-info"><i class="fas fa-shield-alt"></i> <strong>Pembayaran digital yang aman dan mudah.</strong> Anda dapat melakukan pembayaran sebelum atau sesudah layanan dimulai.</p>
+                    </div>
+
+                    <!-- Payment Details Display (Online) -->
+                    <div id="paymentDetailsDisplay" class="payment-details-box hidden">
+                        <!-- DANA Payment -->
+                        <div id="danaPaymentDetails" class="payment-detail-section hidden">
+                            <h4><i class="fas fa-mobile-alt"></i> Pembayaran via DANA</h4>
+                            <div class="payment-detail-content">
+                                <p class="payment-number"><strong>Nomor DANA:</strong> <span id="danaNumber">085836163007</span></p>
+                                <p class="payment-instruction">Buka aplikasi DANA Anda dan transfer ke nomor di atas. Konfirmasi nomor referensi booking Anda setelah transfer.</p>
+                            </div>
+                        </div>
+
+                        <!-- QRIS Payment -->
+                        <div id="qrisPaymentDetails" class="payment-detail-section hidden">
+                            <h4><i class="fas fa-qrcode"></i> Pembayaran via QRIS</h4>
+                            <div class="payment-detail-content">
+                                <p class="payment-instruction">Scan QR Code di bawah menggunakan aplikasi pembayaran pilihan Anda:</p>
+                                <div class="qris-display">
+                                    <img id="qrisImage" src="assets/QRIS.jpeg" alt="QRIS Code" class="qris-code" onerror="this.alt = 'File QRIS.jpeg belum ditambahkan. Hubungi admin.'; this.style.opacity = '0.5';">
+                                </div>
+                                <p class="payment-instruction-small">Konfirmasi pembayaran Anda melalui WhatsApp atau email kami.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Booking Summary -->
+                    <div id="bookingSummary" class="booking-summary hidden">
+                        <h4>Ringkasan Booking Anda</h4>
+                        <div class="summary-item">
+                            <span>Metode Layanan:</span>
+                            <strong id="summaryMethod">-</strong>
+                        </div>
+                        <div id="summaryPaymentItem" class="summary-item hidden">
+                            <span>Metode Pembayaran:</span>
+                            <strong id="summaryPayment">-</strong>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Kirim Booking</button>
+                </form>
+            </div>
         </div>
     </section>
 
