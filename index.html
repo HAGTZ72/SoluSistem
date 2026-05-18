@@ -50,6 +50,7 @@
                 <li><a href="#contact">Kontak</a></li>
             </ul>
             <button class="hamburger" type="button" aria-label="Buka menu drawer" aria-expanded="false">
+                <span class="screen-reader-text">Buka menu</span>
                 <img src="assets/Logo Drawer.jpeg" alt="Menu drawer logo" class="hamburger-logo">
             </button>
         </div>
@@ -65,6 +66,23 @@
                 <div class="hero-actions">
                     <a href="#booking" class="btn-primary">Pesan Sekarang</a>
                     <a href="https://wa.me/6285762779405?text=Halo%20SoluSistem,%20saya%20ingin%20membuat%20booking" class="btn-secondary" target="_blank">Hubungi Kami</a>
+                </div>
+            </div>
+            <div class="hero-media">
+                <div class="hero-card">
+                    <span class="hero-card-tag">Layanan Profesional</span>
+                    <h3>Solusi IT custom untuk rumah & usaha kecil</h3>
+                    <p>Kami siap bantu dari instalasi software, perbaikan ringan, hingga dukungan jarak jauh dengan pembayaran DANA / QRIS.</p>
+                    <div class="hero-card-metrics">
+                        <div class="metric">
+                            <strong>4.9/5</strong>
+                            <span>Rating pelanggan</span>
+                        </div>
+                        <div class="metric">
+                            <strong>250+</strong>
+                            <span>Proyek terselesaikan</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -356,27 +374,55 @@
         </div>
     </section>
 
+    <section id="faq" class="faq">
+        <div class="container">
+            <div class="section-header">
+                <h2>Pertanyaan Umum</h2>
+                <p class="section-subtitle">Jawaban cepat untuk membantu Anda memilih layanan yang paling tepat.</p>
+            </div>
+            <div class="faq-grid">
+                <button type="button" class="faq-item" aria-expanded="false">
+                    <span class="question">Bagaimana cara kerja layanan Online?</span>
+                    <span class="faq-icon">+</span>
+                    <span class="answer hidden">Layanan Online menggunakan video call, chat, dan panduan jarak jauh untuk menyelesaikan masalah tanpa perlu bertemu langsung.</span>
+                </button>
+                <button type="button" class="faq-item" aria-expanded="false">
+                    <span class="question">Apakah pembayaran bisa lewat DANA dan QRIS?</span>
+                    <span class="faq-icon">+</span>
+                    <span class="answer hidden">Ya. Untuk layanan Online kami menyediakan pembayaran DANA dan QRIS. Anda dapat konfirmasi transaksi melalui WhatsApp setelah melakukan pembayaran.</span>
+                </button>
+                <button type="button" class="faq-item" aria-expanded="false">
+                    <span class="question">Layanan Offline tersedia di area mana?</span>
+                    <span class="faq-icon">+</span>
+                    <span class="answer hidden">Layanan Offline tersedia untuk area sekitar Jakarta dan sekitarnya. Silakan isi alamat lengkap dan link Google Maps saat booking agar tim dapat menemukan lokasi Anda dengan cepat.</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
     <section id="contact" class="contact">
         <div class="container">
             <div class="section-header">
                 <h2>Kontak Kami</h2>
-                <p>Hubungi SoluSistem lewat WhatsApp atau email, kami siap membantu kebutuhan teknologi Anda.</p>
+                <p>Hubungi SoluSistem lewat WhatsApp atau email — kami siap membantu.</p>
             </div>
             <div class="contact-grid">
-                <div class="contact-card">
-                    <i class="fab fa-whatsapp"></i>
-                    <h3>WhatsApp</h3>
-                    <p><a href="https://wa.me/6285762779405?text=Halo%20SoluSistem" target="_blank">0857-6277-9405</a></p>
-                </div>
-                <div class="contact-card">
-                    <i class="fas fa-envelope"></i>
-                    <h3>Email</h3>
-                    <p><a href="mailto:admin.solusistem@gmail.com">admin.solusistem@gmail.com</a></p>
-                </div>
-                <div class="contact-card">
-                    <i class="fas fa-info-circle"></i>
-                    <h3>Ajak Hubungi</h3>
-                    <p>Jangan ragu bertanya. Tim kami siap memberi solusi sederhana dan cepat.</p>
+                <div class="contact-cards">
+                    <div class="contact-card">
+                        <i class="fab fa-whatsapp"></i>
+                        <h3>WhatsApp</h3>
+                        <p><a href="https://wa.me/6285762779405?text=Halo%20SoluSistem" target="_blank">0857-6277-9405</a></p>
+                    </div>
+                    <div class="contact-card">
+                        <i class="fas fa-envelope"></i>
+                        <h3>Email</h3>
+                        <p><a class="email-link" href="mailto:admin.solusistem@gmail.com">admin.solusistem@gmail.com</a></p>
+                    </div>
+                    <div class="contact-card">
+                        <i class="fas fa-info-circle"></i>
+                        <h3>Ajak Hubungi</h3>
+                        <p>Jangan ragu bertanya. Tim kami siap memberi solusi sederhana dan cepat.</p>
+                    </div>
                 </div>
             </div>
         </div>

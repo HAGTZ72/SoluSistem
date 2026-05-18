@@ -19,6 +19,58 @@ function showMessage(message, type) {
     }
 }
 
+function hideLoader() {
+    const loader = document.getElementById('loader');
+    if (!loader) return;
+    loader.classList.add('loader-hidden');
+    setTimeout(() => {
+        loader.style.display = 'none';
+    }, 500);
+}
+
+function setFieldError(input, message) {
+    if (!input) return;
+    input.classList.add('input-error');
+    input.setAttribute('aria-invalid', 'true');
+    const existingError = input.nextElementSibling;
+    if (existingError?.classList.contains('error-text')) {
+        existingError.textContent = message;
+        return;
+    }
+    const error = document.createElement('p');
+    error.className = 'error-text';
+    error.textContent = message;
+    input.insertAdjacentElement('afterend', error);
+}
+
+function clearFieldError(input) {
+    if (!input) return;
+    input.classList.remove('input-error');
+    input.removeAttribute('aria-invalid');
+    const next = input.nextElementSibling;
+    if (next?.classList.contains('error-text')) {
+        next.remove();
+    }
+}
+
+function setupInputValidation() {
+    document.querySelectorAll('input[required], select[required], textarea[required]').forEach(input => {
+        input.addEventListener('blur', () => {
+            if (input.value.trim() === '') {
+                setFieldError(input, 'Field ini wajib diisi.');
+            } else {
+                clearFieldError(input);
+            }
+        });
+
+        input.addEventListener('input', () => {
+            if (input.value.trim() !== '') {
+                clearFieldError(input);
+            }
+        });
+    });
+}
+
 // Smooth scroll untuk semua anchor links (desktop & mobile)
 function setupSmoothScroll() {
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -62,7 +114,26 @@ function setupSmoothScroll() {
 }
 
 // Panggil setup saat DOM ready
-document.addEventListener('DOMContentLoaded', setupSmoothScroll);
+document.addEventListener('DOMContentLoaded', () => {
+    setupSmoothScroll();
+    setupInputValidation();
+
+    const backToTop = document.getElementById('backToTop');
+    if (backToTop) {
+        window.addEventListener('scroll', () => {
+            backToTop.classList.toggle('show', window.scrollY > 420);
+        });
+
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+});
+
+window.addEventListener('load', () => {
+    handleNavbarCompact();
+    hideLoader();
+});
 
 // Mobile menu toggle
 const hamburger = document.querySelector('.hamburger');
@@ -298,7 +369,21 @@ if (bookingForm) {
         const paymentMethod = (formData.get('paymentMethod') || '').trim();
 
         // Validate required fields
+        const nameInput = document.getElementById('nama');
+        const phoneInput = document.getElementById('phone');
+        const serviceSelectElement = document.getElementById('service');
+        const keluhanInput = document.getElementById('keluhan');
+
+        clearFieldError(nameInput);
+        clearFieldError(phoneInput);
+        clearFieldError(serviceSelectElement);
+        clearFieldError(keluhanInput);
+
         if (!nama || !phone || !service || !keluhan || !serviceMethod) {
+            if (!nama) setFieldError(nameInput, 'Nama wajib diisi.');
+            if (!phone) setFieldError(phoneInput, 'Nomor HP wajib diisi.');
+            if (!service) setFieldError(serviceSelectElement, 'Pilih jenis layanan terlebih dahulu.');
+            if (!keluhan) setFieldError(keluhanInput, 'Keluhan atau keterangan wajib diisi.');
             showMessage('Silakan isi semua field wajib sebelum mengirim.', 'error');
             if (submitBtn) { submitBtn.textContent = originalText; submitBtn.disabled = false; }
             return;
@@ -308,8 +393,15 @@ if (bookingForm) {
         if (serviceMethod === 'offline') {
             const alamat = (formData.get('alamat') || '').trim();
             const gmapsLink = (formData.get('gmapsLink') || '').trim();
+            const alamatInput = document.getElementById('alamat');
+            const gmapsInput = document.getElementById('gmapsLink');
+
+            clearFieldError(alamatInput);
+            clearFieldError(gmapsInput);
 
             if (!alamat || !gmapsLink) {
+                if (!alamat) setFieldError(alamatInput, 'Alamat lengkap harus diisi untuk layanan offline.');
+                if (!gmapsLink) setFieldError(gmapsInput, 'Link Google Maps harus diisi untuk layanan offline.');
                 showMessage('Untuk layanan Offline, alamat lengkap dan link Google Maps harus diisi.', 'error');
                 if (submitBtn) { submitBtn.textContent = originalText; submitBtn.disabled = false; }
                 return;
@@ -373,6 +465,28 @@ if (contactForm) {
         e.target.reset();
     });
 }
+
+const faqItems = document.querySelectorAll('.faq-item');
+faqItems.forEach(item => {
+    item.addEventListener('click', () => {
+        const isExpanded = item.classList.toggle('active');
+        item.setAttribute('aria-expanded', String(isExpanded));
+        const answer = item.querySelector('.answer');
+        if (answer) {
+            answer.classList.toggle('hidden', !isExpanded);
+        }
+        faqItems.forEach(otherItem => {
+            if (otherItem !== item) {
+                otherItem.classList.remove('active');
+                otherItem.setAttribute('aria-expanded', 'false');
+                const otherAnswer = otherItem.querySelector('.answer');
+                if (otherAnswer) {
+                    otherAnswer.classList.add('hidden');
+                }
+            }
+        });
+    });
+});
 
 // Service card hover effects
 document.querySelectorAll('.service-card').forEach(card => {
