@@ -273,6 +273,32 @@
                                 <p class="payment-instruction-small">Konfirmasi pembayaran Anda melalui WhatsApp atau email kami.</p>
                             </div>
                         </div>
+
+                        <!-- Upload Payment Proof -->
+                        <div class="payment-proof-section">
+                            <h4><i class="fas fa-receipt"></i> Upload Bukti Pembayaran</h4>
+                            <p class="payment-proof-instruction">Silakan upload screenshot atau foto bukti pembayaran Anda untuk konfirmasi lebih cepat.</p>
+                            <div class="file-upload-container">
+                                <input type="file" id="paymentProof" name="paymentProof" accept="image/*,.pdf" class="file-input">
+                                <label for="paymentProof" class="file-upload-label">
+                                    <div class="file-upload-icon">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                    </div>
+                                    <div class="file-upload-text">
+                                        <span class="file-upload-main">Klik untuk upload atau drag and drop</span>
+                                        <span class="file-upload-hint">JPG, PNG, atau PDF (Max 5MB)</span>
+                                    </div>
+                                </label>
+                                <div id="filePreview" class="file-preview hidden">
+                                    <div class="file-preview-item">
+                                        <i class="fas fa-file-image"></i>
+                                        <span id="fileName">-</span>
+                                        <button type="button" id="removeFileBtn" class="remove-file-btn" aria-label="Hapus file">×</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <p id="fileError" class="file-error hidden"></p>
+                        </div>
                     </div>
 
                     <!-- Booking Summary -->

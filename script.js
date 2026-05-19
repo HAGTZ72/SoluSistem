@@ -268,6 +268,11 @@ if (bookingForm) {
         // Reset payment selection
         document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => radio.checked = false);
 
+        // Reset file upload for offline method
+        if (selectedMethod === 'offline') {
+            removeSelectedFile();
+        }
+
         detailGroup.classList.toggle('hidden', !selectedMethod);
 
         if (selectedMethod === 'online') {
@@ -402,6 +407,119 @@ if (bookingForm) {
         });
     }
 
+    // File upload handling
+    const fileInput = document.getElementById('paymentProof');
+    const filePreview = document.getElementById('filePreview');
+    const fileName = document.getElementById('fileName');
+    const fileError = document.getElementById('fileError');
+    const removeFileBtn = document.getElementById('removeFileBtn');
+    let selectedFile = null;
+
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+    const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.pdf'];
+
+    function showFileError(message) {
+        fileError.textContent = message;
+        fileError.classList.remove('hidden');
+    }
+
+    function clearFileError() {
+        fileError.textContent = '';
+        fileError.classList.add('hidden');
+    }
+
+    function validateFile(file) {
+        // Check file size
+        if (file.size > MAX_FILE_SIZE) {
+            showFileError('Ukuran file terlalu besar. Maksimal 5MB.');
+            return false;
+        }
+
+        // Check file type
+        if (!ALLOWED_TYPES.includes(file.type)) {
+            showFileError('Tipe file tidak didukung. Gunakan JPG, PNG, atau PDF.');
+            return false;
+        }
+
+        clearFileError();
+        return true;
+    }
+
+    function displayFilePreview(file) {
+        fileName.textContent = file.name;
+        filePreview.classList.remove('hidden');
+        selectedFile = file;
+    }
+
+    function removeSelectedFile() {
+        fileInput.value = '';
+        selectedFile = null;
+        filePreview.classList.add('hidden');
+        clearFileError();
+    }
+
+    if (fileInput) {
+        // Handle file selection via click
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file && validateFile(file)) {
+                displayFilePreview(file);
+            } else if (e.target.files[0]) {
+                fileInput.value = '';
+                selectedFile = null;
+            }
+        });
+
+        // Handle drag and drop
+        const fileUploadLabel = document.querySelector('.file-upload-label');
+        if (fileUploadLabel) {
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                fileUploadLabel.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                });
+
+                document.body.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                });
+            });
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                fileUploadLabel.addEventListener(eventName, () => {
+                    fileUploadLabel.style.background = 'linear-gradient(135deg, rgba(37, 99, 235, 0.15) 0%, rgba(59, 130, 246, 0.12) 100%)';
+                    fileUploadLabel.style.borderColor = '#1d4ed8';
+                });
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                fileUploadLabel.addEventListener(eventName, () => {
+                    fileUploadLabel.style.background = 'linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(59, 130, 246, 0.06) 100%)';
+                    fileUploadLabel.style.borderColor = '#2563eb';
+                });
+            });
+
+            fileUploadLabel.addEventListener('drop', (e) => {
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    const file = files[0];
+                    if (validateFile(file)) {
+                        fileInput.files = files;
+                        displayFilePreview(file);
+                    }
+                }
+            });
+        }
+
+        if (removeFileBtn) {
+            removeFileBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                removeSelectedFile();
+            });
+        }
+    }
+
     // Event listeners
     serviceSelect.addEventListener('change', updateCostEstimation);
 
@@ -482,6 +600,13 @@ if (bookingForm) {
             return;
         }
 
+        // Validate payment proof for online method
+        if (serviceMethod === 'online' && !selectedFile) {
+            showMessage('Untuk layanan Online, upload bukti pembayaran Anda.', 'error');
+            if (submitBtn) { submitBtn.textContent = originalText; submitBtn.disabled = false; }
+            return;
+        }
+
         // Build booking data
         const bookingData = {
             nama,
@@ -499,6 +624,7 @@ if (bookingForm) {
         } else {
             bookingData.alamatOnline = (formData.get('alamatOnline') || '').trim();
             bookingData.paymentMethod = paymentMethod;
+            bookingData.paymentProofFileName = selectedFile?.name || '';
         }
 
         try {
