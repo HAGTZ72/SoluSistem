@@ -580,14 +580,16 @@ textarea:focus-visible,
 /* Radio Group Styles */
 .radio-group {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 12px;
     margin-top: 12px;
+    align-items: stretch;
 }
 
 .radio-option {
     position: relative;
     cursor: pointer;
+    display: flex;
 }
 
 .radio-option input[type="radio"] {
@@ -605,12 +607,15 @@ textarea:focus-visible,
     display: flex;
     flex-direction: column;
     gap: 6px;
-    padding: 16px;
+    flex: 1;
+    min-height: 140px;
+    padding: 20px;
     background: #f8fafc;
     border: 2px solid #cbd5e1;
     border-radius: 12px;
     transition: all 0.25s ease;
     cursor: pointer;
+    justify-content: center;
 }
 
 .radio-label i {
@@ -897,6 +902,7 @@ textarea:focus-visible,
     flex-direction: column;
     gap: 12px;
     position: relative;
+    width: 100%;
 }
 
 .file-input {
@@ -914,6 +920,8 @@ textarea:focus-visible,
     border-radius: 16px;
     cursor: pointer;
     transition: all 0.25s ease;
+    width: 100%;
+    min-height: 180px;
 }
 
 .file-upload-label:hover {
@@ -949,22 +957,52 @@ textarea:focus-visible,
 .file-preview {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 12px;
 }
 
 .file-preview.hidden {
     display: none;
 }
 
-.file-preview-item {
+.file-preview-image {
     display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.file-preview-image.hidden {
+    display: none;
+}
+
+.preview-image-frame {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: 16px;
+    background: #eef2ff;
+    border: 1px solid #c7d2fe;
+}
+
+.preview-image-frame img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.file-preview-item {
+    display: grid;
+    grid-template-columns: minmax(24px, auto) minmax(0, 1fr) minmax(32px, auto);
     align-items: center;
     gap: 12px;
     padding: 12px;
+    width: 100%;
     background: #f0f9ff;
     border: 1px solid #7dd3fc;
     border-radius: 12px;
-    justify-content: space-between;
+    min-width: 0;
 }
 
 .file-preview-item i {
@@ -974,10 +1012,22 @@ textarea:focus-visible,
 }
 
 #fileName {
-    flex: 1;
     color: #0f172a;
     font-size: 0.9rem;
-    word-break: break-all;
+    word-break: normal;
+    overflow-wrap: normal;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    max-width: 100%;
+}
+
+#fileName::after {
+    content: '';
+    display: block;
+    width: 0;
+    height: 0;
 }
 
 .remove-file-btn {

@@ -11,6 +11,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-analytics.js";
         import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
+        import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAtJbZgCDg6YZlSQLrzaa5qGwR36UBvEJU",
@@ -25,11 +26,16 @@
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
         const database = getDatabase(app);
+        const storage = getStorage(app);
 
         window.firebaseDatabase = database;
         window.firebaseRef = ref;
         window.firebasePush = push;
         window.firebaseSet = set;
+        window.firebaseStorage = storage;
+        window.firebaseStorageRef = storageRef;
+        window.firebaseUploadBytes = uploadBytes;
+        window.firebaseGetDownloadURL = getDownloadURL;
     </script>
 </head>
 <body>
@@ -149,11 +155,11 @@
                     </div>
                 </div>
 
-                <form id="bookingForm" class="booking-form">
+                <form id="bookingForm" class="booking-form" novalidate>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="nama">Nama Lengkap</label>
-                            <input type="text" id="nama" name="nama" required placeholder="Budi Santoso">
+                            <input type="text" id="nama" name="nama" required placeholder="Juhaldi">
                         </div>
                         <div class="form-group">
                             <label for="phone">Nomor HP</label>
@@ -175,7 +181,7 @@
                     <!-- Service Method Selection -->
                     <div class="form-group">
                         <label>Metode Layanan</label>
-                        <div class="radio-group">
+                        <div class="radio-group" id="serviceMethodGroup">
                             <label class="radio-option">
                                 <input type="radio" name="serviceMethod" value="online" required>
                                 <span class="radio-label">
@@ -191,6 +197,7 @@
                                 </span>
                             </label>
                         </div>
+                        <p id="serviceMethodError" class="error-text hidden"></p>
                     </div>
 
                     <!-- Online Service Info -->
@@ -232,9 +239,9 @@
                     </div>
 
                     <!-- Payment Method (Online Only) -->
-                    <div id="paymentMethodGroup" class="form-group-section hidden">
+                    <div id="paymentMethodSection" class="form-group-section hidden">
                         <label>Metode Pembayaran</label>
-                        <div class="payment-options">
+                        <div class="payment-options" id="paymentMethodGroup">
                             <label class="payment-option">
                                 <input type="radio" name="paymentMethod" value="dana">
                                 <span class="payment-label">
@@ -248,6 +255,7 @@
                                 </span>
                             </label>
                         </div>
+                        <p id="paymentMethodError" class="error-text hidden"></p>
                         <p class="payment-info"><i class="fas fa-shield-alt"></i> <strong>Pembayaran digital yang aman dan mudah.</strong> Anda dapat melakukan pembayaran sebelum atau sesudah layanan dimulai.</p>
                     </div>
 
@@ -290,6 +298,11 @@
                                     </div>
                                 </label>
                                 <div id="filePreview" class="file-preview hidden">
+                                    <div id="previewImageWrapper" class="file-preview-image hidden">
+                                        <div class="preview-image-frame">
+                                            <img id="previewImage" alt="Pratinjau bukti pembayaran">
+                                        </div>
+                                    </div>
                                     <div class="file-preview-item">
                                         <i class="fas fa-file-image"></i>
                                         <span id="fileName">-</span>

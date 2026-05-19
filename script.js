@@ -216,8 +216,11 @@ if (bookingForm) {
     const onlineAddressGroup = document.getElementById('onlineAddressGroup');
     const offlineAddressGroup = document.getElementById('offlineAddressGroup');
     const paymentMethodGroup = document.getElementById('paymentMethodGroup');
+    const serviceMethodGroup = document.getElementById('serviceMethodGroup');
+    const paymentMethodSection = document.getElementById('paymentMethodSection');
     const paymentDetailsDisplay = document.getElementById('paymentDetailsDisplay');
     const danaPaymentDetails = document.getElementById('danaPaymentDetails');
+    bookingForm.setAttribute('novalidate', '');
     const qrisPaymentDetails = document.getElementById('qrisPaymentDetails');
     const bookingSummary = document.getElementById('bookingSummary');
     const summaryMethod = document.getElementById('summaryMethod');
@@ -265,6 +268,9 @@ if (bookingForm) {
     function updateServiceMethodUI() {
         const selectedMethod = document.querySelector('input[name="serviceMethod"]:checked')?.value;
 
+        clearGroupError(serviceMethodGroup);
+        clearGroupError(paymentMethodGroup);
+
         // Reset payment selection
         document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => radio.checked = false);
 
@@ -281,12 +287,10 @@ if (bookingForm) {
             offlineServiceInfo.classList.add('hidden');
             onlineAddressGroup.classList.remove('hidden');
             offlineAddressGroup.classList.add('hidden');
-            paymentMethodGroup.classList.remove('hidden');
+            paymentMethodSection?.classList.remove('hidden');
             paymentDetailsDisplay.classList.add('hidden');
 
             // Reset offline required fields
-            document.getElementById('alamat').removeAttribute('required');
-            document.getElementById('gmapsLink').removeAttribute('required');
             if (gmapsLinkInput) {
                 gmapsLinkInput.readOnly = false;
             }
@@ -299,12 +303,10 @@ if (bookingForm) {
             offlineServiceInfo.classList.remove('hidden');
             onlineAddressGroup.classList.add('hidden');
             offlineAddressGroup.classList.remove('hidden');
-            paymentMethodGroup.classList.add('hidden');
+            paymentMethodSection?.classList.add('hidden');
             paymentDetailsDisplay.classList.add('hidden');
 
             // Set offline required fields
-            document.getElementById('alamat').setAttribute('required', '');
-            document.getElementById('gmapsLink').setAttribute('required', '');
             if (gmapsLinkInput) {
                 gmapsLinkInput.readOnly = false;
             }
@@ -314,7 +316,7 @@ if (bookingForm) {
             offlineServiceInfo.classList.add('hidden');
             onlineAddressGroup.classList.add('hidden');
             offlineAddressGroup.classList.add('hidden');
-            paymentMethodGroup.classList.add('hidden');
+            paymentMethodSection?.classList.add('hidden');
             paymentDetailsDisplay.classList.add('hidden');
             bookingSummary.classList.add('hidden');
         }
@@ -327,6 +329,7 @@ if (bookingForm) {
     function handlePaymentMethodChange() {
         const selectedPayment = document.querySelector('input[name="paymentMethod"]:checked')?.value;
 
+        clearGroupError(paymentMethodGroup);
         paymentDetailsDisplay.classList.toggle('hidden', !selectedPayment);
         danaPaymentDetails.classList.toggle('hidden', selectedPayment !== 'dana');
         qrisPaymentDetails.classList.toggle('hidden', selectedPayment !== 'qris');
@@ -335,6 +338,24 @@ if (bookingForm) {
     }
 
     // Update booking summary
+    function clearGroupError(element) {
+        if (!element) return;
+        const next = element.nextElementSibling;
+        if (next?.classList.contains('error-text')) {
+            next.textContent = '';
+            next.classList.add('hidden');
+        }
+    }
+
+    function setGroupError(element, message) {
+        if (!element) return;
+        const next = element.nextElementSibling;
+        if (next?.classList.contains('error-text')) {
+            next.textContent = message;
+            next.classList.remove('hidden');
+        }
+    }
+
     function updateBookingSummary() {
         const selectedMethod = document.querySelector('input[name="serviceMethod"]:checked')?.value;
         const selectedPayment = document.querySelector('input[name="paymentMethod"]:checked')?.value;
@@ -413,7 +434,10 @@ if (bookingForm) {
     const fileName = document.getElementById('fileName');
     const fileError = document.getElementById('fileError');
     const removeFileBtn = document.getElementById('removeFileBtn');
+    const previewImageWrapper = document.getElementById('previewImageWrapper');
+    const previewImage = document.getElementById('previewImage');
     let selectedFile = null;
+    let previewImageUrl = '';
 
     const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
     const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
@@ -446,16 +470,41 @@ if (bookingForm) {
         return true;
     }
 
+    function withTimeout(promise, timeoutMs, timeoutMessage) {
+        return Promise.race([
+            promise,
+            new Promise((_, reject) => setTimeout(() => reject(new Error(timeoutMessage)), timeoutMs))
+        ]);
+    }
+
     function displayFilePreview(file) {
         fileName.textContent = file.name;
+        if (file.type.startsWith('image/') && previewImage && previewImageWrapper) {
+            if (previewImageUrl) {
+                URL.revokeObjectURL(previewImageUrl);
+            }
+            previewImageUrl = URL.createObjectURL(file);
+            previewImage.src = previewImageUrl;
+            previewImage.alt = `Pratinjau ${file.name}`;
+            previewImageWrapper.classList.remove('hidden');
+        } else if (previewImageWrapper) {
+            previewImageWrapper.classList.add('hidden');
+        }
         filePreview.classList.remove('hidden');
         selectedFile = file;
     }
 
     function removeSelectedFile() {
+        if (previewImageUrl) {
+            URL.revokeObjectURL(previewImageUrl);
+            previewImageUrl = '';
+        }
         fileInput.value = '';
         selectedFile = null;
         filePreview.classList.add('hidden');
+        if (previewImageWrapper) {
+            previewImageWrapper.classList.add('hidden');
+        }
         clearFileError();
     }
 
@@ -505,7 +554,9 @@ if (bookingForm) {
                 if (files.length > 0) {
                     const file = files[0];
                     if (validateFile(file)) {
-                        fileInput.files = files;
+                        const dt = new DataTransfer();
+                        dt.items.add(file);
+                        fileInput.files = dt.files;
                         displayFilePreview(file);
                     }
                 }
@@ -546,108 +597,147 @@ if (bookingForm) {
             submitBtn.disabled = true;
         }
 
-        const formData = new FormData(e.target);
-        const nama = (formData.get('nama') || '').trim();
-        const phone = (formData.get('phone') || '').trim();
-        const service = (formData.get('service') || '').trim();
-        const keluhan = (formData.get('keluhan') || '').trim();
-        const serviceMethod = (formData.get('serviceMethod') || '').trim();
-        const paymentMethod = (formData.get('paymentMethod') || '').trim();
+        try {
+            const formData = new FormData(e.target);
+            const nama = (formData.get('nama') || '').trim();
+            const phone = (formData.get('phone') || '').trim();
+            const service = (formData.get('service') || '').trim();
+            const keluhan = (formData.get('keluhan') || '').trim();
+            const serviceMethod = (formData.get('serviceMethod') || '').trim();
+            const paymentMethod = (formData.get('paymentMethod') || '').trim();
+            const paymentProofFile = fileInput?.files?.[0] || selectedFile || null;
 
-        // Validate required fields
-        const nameInput = document.getElementById('nama');
-        const phoneInput = document.getElementById('phone');
-        const serviceSelectElement = document.getElementById('service');
-        const keluhanInput = document.getElementById('keluhan');
+            // Validate required fields
+            const nameInput = document.getElementById('nama');
+            const phoneInput = document.getElementById('phone');
+            const serviceSelectElement = document.getElementById('service');
+            const keluhanInput = document.getElementById('keluhan');
 
-        clearFieldError(nameInput);
-        clearFieldError(phoneInput);
-        clearFieldError(serviceSelectElement);
-        clearFieldError(keluhanInput);
+            clearFieldError(nameInput);
+            clearFieldError(phoneInput);
+            clearFieldError(serviceSelectElement);
+            clearFieldError(keluhanInput);
 
-        if (!nama || !phone || !service || !keluhan || !serviceMethod) {
-            if (!nama) setFieldError(nameInput, 'Nama wajib diisi.');
-            if (!phone) setFieldError(phoneInput, 'Nomor HP wajib diisi.');
-            if (!service) setFieldError(serviceSelectElement, 'Pilih jenis layanan terlebih dahulu.');
-            if (!keluhan) setFieldError(keluhanInput, 'Keluhan atau keterangan wajib diisi.');
-            showMessage('Silakan isi semua field wajib sebelum mengirim.', 'error');
-            if (submitBtn) { submitBtn.textContent = originalText; submitBtn.disabled = false; }
-            return;
-        }
+            clearGroupError(serviceMethodGroup);
+            clearGroupError(paymentMethodGroup);
 
-        // Validate method-specific required fields
-        if (serviceMethod === 'offline') {
-            const alamat = (formData.get('alamat') || '').trim();
-            const gmapsLink = (formData.get('gmapsLink') || '').trim();
-            const alamatInput = document.getElementById('alamat');
-            const gmapsInput = document.getElementById('gmapsLink');
-
-            clearFieldError(alamatInput);
-            clearFieldError(gmapsInput);
-
-            if (!alamat || !gmapsLink) {
-                if (!alamat) setFieldError(alamatInput, 'Alamat lengkap harus diisi untuk layanan offline.');
-                if (!gmapsLink) setFieldError(gmapsInput, 'Link Google Maps harus diisi untuk layanan offline.');
-                showMessage('Untuk layanan Offline, alamat lengkap dan link Google Maps harus diisi.', 'error');
-                if (submitBtn) { submitBtn.textContent = originalText; submitBtn.disabled = false; }
+            if (!nama || !phone || !service || !keluhan || !serviceMethod) {
+                if (!nama) setFieldError(nameInput, 'Nama wajib diisi.');
+                if (!phone) setFieldError(phoneInput, 'Nomor HP wajib diisi.');
+                if (!service) setFieldError(serviceSelectElement, 'Pilih jenis layanan terlebih dahulu.');
+                if (!keluhan) setFieldError(keluhanInput, 'Keluhan atau keterangan wajib diisi.');
+                if (!serviceMethod) setGroupError(serviceMethodGroup, 'Pilih metode layanan terlebih dahulu.');
+                showMessage('Silakan isi semua field wajib sebelum mengirim.', 'error');
                 return;
             }
-        }
 
-        if (serviceMethod === 'online' && !paymentMethod) {
-            showMessage('Untuk layanan Online, pilih metode pembayaran.', 'error');
-            if (submitBtn) { submitBtn.textContent = originalText; submitBtn.disabled = false; }
-            return;
-        }
+            // Validate method-specific required fields
+            if (serviceMethod === 'offline') {
+                const alamat = (formData.get('alamat') || '').trim();
+                const gmapsLink = (formData.get('gmapsLink') || '').trim();
+                const alamatInput = document.getElementById('alamat');
+                const gmapsInput = document.getElementById('gmapsLink');
 
-        // Validate payment proof for online method
-        if (serviceMethod === 'online' && !selectedFile) {
-            showMessage('Untuk layanan Online, upload bukti pembayaran Anda.', 'error');
-            if (submitBtn) { submitBtn.textContent = originalText; submitBtn.disabled = false; }
-            return;
-        }
+                clearFieldError(alamatInput);
+                clearFieldError(gmapsInput);
 
-        // Build booking data
-        const bookingData = {
-            nama,
-            phone,
-            service,
-            keluhan,
-            serviceMethod,
-            timestamp: new Date().toISOString()
-        };
+                if (!alamat || !gmapsLink) {
+                    if (!alamat) setFieldError(alamatInput, 'Alamat lengkap harus diisi untuk layanan offline.');
+                    if (!gmapsLink) setFieldError(gmapsInput, 'Link Google Maps harus diisi untuk layanan offline.');
+                    showMessage('Untuk layanan Offline, alamat lengkap dan link Google Maps harus diisi.', 'error');
+                    return;
+                }
+            }
 
-        // Add optional/conditional fields
-        if (serviceMethod === 'offline') {
-            bookingData.alamat = (formData.get('alamat') || '').trim();
-            bookingData.gmapsLink = (formData.get('gmapsLink') || '').trim();
-        } else {
-            bookingData.alamatOnline = (formData.get('alamatOnline') || '').trim();
-            bookingData.paymentMethod = paymentMethod;
-            bookingData.paymentProofFileName = selectedFile?.name || '';
-        }
+            if (serviceMethod === 'online' && !paymentMethod) {
+                setGroupError(paymentMethodGroup, 'Pilih metode pembayaran untuk layanan online.');
+                showMessage('Untuk layanan Online, pilih metode pembayaran.', 'error');
+                return;
+            }
 
-        try {
+            // Validate payment proof for online method
+            if (serviceMethod === 'online' && !paymentProofFile) {
+                showFileError('Upload bukti pembayaran diperlukan.');
+                showMessage('Untuk layanan Online, upload bukti pembayaran Anda.', 'error');
+                return;
+            }
+
+            if (serviceMethod === 'online' && paymentProofFile && !validateFile(paymentProofFile)) {
+                return;
+            }
+
+            clearGroupError(serviceMethodGroup);
+            clearGroupError(paymentMethodGroup);
+
+            // Build booking data
+            const bookingData = {
+                nama,
+                phone,
+                service,
+                keluhan,
+                serviceMethod,
+                timestamp: new Date().toISOString()
+            };
+
+            // Add optional/conditional fields
+            if (serviceMethod === 'offline') {
+                bookingData.alamat = (formData.get('alamat') || '').trim();
+                bookingData.gmapsLink = (formData.get('gmapsLink') || '').trim();
+            } else {
+                bookingData.alamatOnline = (formData.get('alamatOnline') || '').trim();
+                bookingData.paymentMethod = paymentMethod;
+                bookingData.paymentProofFileName = paymentProofFile?.name || '';
+            }
+
             if (typeof window.firebaseDatabase !== 'undefined' && typeof window.firebaseRef === 'function') {
+                if (serviceMethod === 'online' && paymentProofFile) {
+                    if (typeof window.firebaseStorage !== 'undefined' && typeof window.firebaseStorageRef === 'function') {
+                        const proofRef = window.firebaseStorageRef(window.firebaseStorage, `paymentProofs/${Date.now()}_${paymentProofFile.name}`);
+                        const uploadResult = await withTimeout(
+                            window.firebaseUploadBytes(proofRef, paymentProofFile),
+                            25000,
+                            'Upload bukti pembayaran memakan waktu terlalu lama. Silakan coba lagi.'
+                        );
+                        const downloadUrl = await withTimeout(
+                            window.firebaseGetDownloadURL(uploadResult.ref),
+                            20000,
+                            'Mengambil URL bukti pembayaran gagal karena waktu habis.'
+                        );
+                        bookingData.paymentProofUrl = downloadUrl;
+                        bookingData.paymentProofFileName = paymentProofFile.name;
+                    } else {
+                        showMessage('Firebase Storage belum terhubung. Upload bukti pembayaran gagal.', 'error');
+                        return;
+                    }
+                }
+
                 const bookingsRef = window.firebaseRef(window.firebaseDatabase, 'bookings');
                 const newBookingRef = window.firebasePush(bookingsRef);
-                await window.firebaseSet(newBookingRef, bookingData);
+                await withTimeout(
+                    window.firebaseSet(newBookingRef, bookingData),
+                    25000,
+                    'Menyimpan booking memakan waktu terlalu lama. Silakan coba lagi.'
+                );
 
                 showMessage('Booking berhasil dikirim. Tim akan menghubungi Anda segera.', 'success');
                 e.target.reset();
-                // Reset UI
+                removeSelectedFile();
                 updateServiceMethodUI();
             } else {
                 showMessage('Firebase belum terhubung. Periksa konfigurasi.', 'error');
             }
         } catch (error) {
-            console.error('Error saving booking:', error);
-            showMessage('Gagal mengirim booking. Silakan coba lagi nanti.', 'error');
+            console.error('Error during booking submit:', error);
+            showMessage('Terjadi kesalahan. Silakan coba lagi.', 'error');
         } finally {
-            if (submitBtn) { submitBtn.textContent = originalText; submitBtn.disabled = false; }
+            if (submitBtn) {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
         }
     });
 }
+
 
 
 // Contact form submission (basic - optional)
