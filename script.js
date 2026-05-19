@@ -223,6 +223,9 @@ if (bookingForm) {
     const summaryMethod = document.getElementById('summaryMethod');
     const summaryPaymentItem = document.getElementById('summaryPaymentItem');
     const summaryPayment = document.getElementById('summaryPayment');
+    const detectLocationBtn = document.getElementById('detectLocationBtn');
+    const locationStatus = document.getElementById('locationStatus');
+    const gmapsLinkInput = document.getElementById('gmapsLink');
 
     // Service prices
     const servicePrices = {
@@ -279,6 +282,12 @@ if (bookingForm) {
             // Reset offline required fields
             document.getElementById('alamat').removeAttribute('required');
             document.getElementById('gmapsLink').removeAttribute('required');
+            if (gmapsLinkInput) {
+                gmapsLinkInput.readOnly = false;
+            }
+            if (locationStatus) {
+                locationStatus.textContent = '';
+            }
         } else if (selectedMethod === 'offline') {
             // Show offline-specific elements
             onlineServiceInfo.classList.add('hidden');
@@ -291,6 +300,9 @@ if (bookingForm) {
             // Set offline required fields
             document.getElementById('alamat').setAttribute('required', '');
             document.getElementById('gmapsLink').setAttribute('required', '');
+            if (gmapsLinkInput) {
+                gmapsLinkInput.readOnly = false;
+            }
         } else {
             // Hide all method-specific sections until a method is chosen
             onlineServiceInfo.classList.add('hidden');
@@ -338,6 +350,58 @@ if (bookingForm) {
         }
     }
 
+    function generateMapsUrl(latitude, longitude) {
+        return `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+    }
+
+    function updateLocationStatus(message, isError = false, mapsUrl = '') {
+        if (!locationStatus) return;
+        locationStatus.textContent = '';
+        locationStatus.className = 'location-status';
+        if (isError) {
+            locationStatus.classList.add('error-text');
+            locationStatus.textContent = message;
+            return;
+        }
+
+        if (mapsUrl) {
+            locationStatus.innerHTML = `${message} <a href="${mapsUrl}" target="_blank" rel="noopener">Buka Google Maps</a>`;
+        } else {
+            locationStatus.textContent = message;
+        }
+    }
+
+    function detectLocation() {
+        if (!navigator.geolocation) {
+            updateLocationStatus('Geolocation tidak didukung di browser ini. Silakan masukkan link Google Maps secara manual.', true);
+            return;
+        }
+
+        updateLocationStatus('Mencari lokasi Anda...');
+        navigator.geolocation.getCurrentPosition((position) => {
+            const { latitude, longitude } = position.coords;
+            const mapsUrl = generateMapsUrl(latitude, longitude);
+
+            if (gmapsLinkInput) {
+                gmapsLinkInput.value = mapsUrl;
+                gmapsLinkInput.readOnly = true;
+            }
+
+            updateLocationStatus('Lokasi terdeteksi. Google Maps terbuka otomatis.', false, mapsUrl);
+            window.open(mapsUrl, '_blank');
+        }, (error) => {
+            let message = 'Gagal mendeteksi lokasi. Silakan isi link Google Maps secara manual.';
+            if (error.code === error.PERMISSION_DENIED) {
+                message = 'Izin lokasi ditolak. Aktifkan izin geolocation di browser untuk menggunakan fitur ini.';
+            }
+            updateLocationStatus(message, true);
+        }, {
+            enableHighAccuracy: true,
+            timeout: 12000,
+            maximumAge: 0
+        });
+    }
+
     // Event listeners
     serviceSelect.addEventListener('change', updateCostEstimation);
 
@@ -348,6 +412,10 @@ if (bookingForm) {
     paymentMethodRadios.forEach(radio => {
         radio.addEventListener('change', handlePaymentMethodChange);
     });
+
+    if (detectLocationBtn) {
+        detectLocationBtn.addEventListener('click', detectLocation);
+    }
 
     // Form submission
     bookingForm.addEventListener('submit', async (e) => {

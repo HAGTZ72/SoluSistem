@@ -384,6 +384,12 @@ textarea:focus-visible,
     margin-bottom: 16px;
 }
 
+.testimonials .section-subtitle {
+    text-align: center;
+    max-width: 720px;
+    margin: 0 auto 12px;
+}
+
 .highlights-grid,
 .services-grid,
 .testimonials-grid,

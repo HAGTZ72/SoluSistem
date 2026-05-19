@@ -68,23 +68,6 @@
                     <a href="https://wa.me/6285762779405?text=Halo%20SoluSistem,%20saya%20ingin%20membuat%20booking" class="btn-secondary" target="_blank">Hubungi Kami</a>
                 </div>
             </div>
-            <div class="hero-media">
-                <div class="hero-card">
-                    <span class="hero-card-tag">Layanan Profesional</span>
-                    <h3>Solusi IT custom untuk rumah & usaha kecil</h3>
-                    <p>Kami siap bantu dari instalasi software, perbaikan ringan, hingga dukungan jarak jauh dengan pembayaran DANA / QRIS.</p>
-                    <div class="hero-card-metrics">
-                        <div class="metric">
-                            <strong>4.9/5</strong>
-                            <span>Rating pelanggan</span>
-                        </div>
-                        <div class="metric">
-                            <strong>250+</strong>
-                            <span>Proyek terselesaikan</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </section>
 
@@ -233,9 +216,11 @@
                                 <input type="text" id="alamat" name="alamat" placeholder="Jl. Merdeka No. 10, Jakarta">
                             </div>
                             <div class="form-group">
-                                <label for="gmapsLink">Link Google Maps / Lokasi <span class="required">*</span></label>
-                                <input type="url" id="gmapsLink" name="gmapsLink" placeholder="Contoh: https://maps.app.goo.gl/...">
-                                <small class="form-hint"><i class="fas fa-question-circle"></i> Salin link dari Google Maps agar tim dapat menemukan lokasi Anda dengan akurat.</small>
+                                <label>Deteksi Lokasi</label>
+                                <button type="button" id="detectLocationBtn" class="btn-primary">Gunakan Lokasi Saya</button>
+                                <input type="url" id="gmapsLink" name="gmapsLink" placeholder="Jika perlu, masukkan link Google Maps secara manual">
+                                <small class="form-hint"><i class="fas fa-question-circle"></i> Klik tombol untuk mendeteksi lokasi langsung. Google Maps akan terbuka otomatis jika Anda memberikan izin.</small>
+                                <p id="locationStatus" class="location-status"></p>
                             </div>
                         </div>
                     </div>
@@ -283,7 +268,7 @@
                             <div class="payment-detail-content">
                                 <p class="payment-instruction">Scan QR Code di bawah menggunakan aplikasi pembayaran pilihan Anda:</p>
                                 <div class="qris-display">
-                                    <img id="qrisImage" src="assets/QRIS.jpeg" alt="QRIS Code" class="qris-code" onerror="this.alt = 'File QRIS.jpeg belum ditambahkan. Hubungi admin.'; this.style.opacity = '0.5';">
+                                    <img id="qrisImage" src="assets/Foto QRIS.jpeg" alt="QRIS Code" class="qris-code" onerror="this.alt = 'File Foto QRIS.jpeg belum ditambahkan. Hubungi admin.'; this.style.opacity = '0.5';">
                                 </div>
                                 <p class="payment-instruction-small">Konfirmasi pembayaran Anda melalui WhatsApp atau email kami.</p>
                             </div>
@@ -318,7 +303,6 @@
                 <div class="testimonial-card">
                     <p>“Saya tidak tahu bagaimana mengatur WiFi rumah. Tim SoluSistem datang dan menjelaskan dengan sabar hingga semua perangkat terhubung.”</p>
                     <div class="client-info">
-                        <img src="https://via.placeholder.com/50x50/1E3A8A/FFFFFF?text=P" alt="Pengguna A">
                         <div>
                             <h4>Putri</h4>
                             <span>Pengguna rumahan</span>
@@ -328,7 +312,6 @@
                 <div class="testimonial-card">
                     <p>“HP saya sering lemot. Mereka bantu bersihkan dan setting ulang aplikasinya sehingga sekarang lebih cepat.”</p>
                     <div class="client-info">
-                        <img src="https://via.placeholder.com/50x50/2563EB/FFFFFF?text=J" alt="Pengguna B">
                         <div>
                             <h4>Joko</h4>
                             <span>Pengguna UMKM</span>
@@ -338,7 +321,6 @@
                 <div class="testimonial-card">
                     <p>“Sistem instalasi software baru sangat mudah. Saya diminta pilih saja, dan semuanya selesai tanpa repot.”</p>
                     <div class="client-info">
-                        <img src="https://via.placeholder.com/50x50/3B82F6/FFFFFF?text=R" alt="Pengguna C">
                         <div>
                             <h4>Rina</h4>
                             <span>Ibu rumah tangga</span>
