@@ -689,9 +689,22 @@ if (bookingForm) {
                 bookingData.paymentProofFileName = paymentProofFile?.name || '';
             }
 
-            if (typeof window.firebaseDatabase !== 'undefined' && typeof window.firebaseRef === 'function') {
-                if (serviceMethod === 'online' && paymentProofFile) {
-                    if (typeof window.firebaseStorage !== 'undefined' && typeof window.firebaseStorageRef === 'function') {
+            if (typeof window.firebaseDatabase === 'undefined' || typeof window.firebaseRef !== 'function' || typeof window.firebasePush !== 'function' || typeof window.firebaseSet !== 'function') {
+                showMessage('Firebase belum siap. Tunggu beberapa detik lalu coba lagi.', 'error');
+                return;
+            }
+
+            if (serviceMethod === 'online' && paymentProofFile) {
+                console.log('Debug: attempting payment proof upload', {
+                    firebaseStorage: window.firebaseStorage,
+                    firebaseStorageRef: typeof window.firebaseStorageRef,
+                    fileName: paymentProofFile.name,
+                    fileType: paymentProofFile.type,
+                    fileSize: paymentProofFile.size
+                });
+
+                if (typeof window.firebaseStorage !== 'undefined' && typeof window.firebaseStorageRef === 'function') {
+                    try {
                         const proofRef = window.firebaseStorageRef(window.firebaseStorage, `paymentProofs/${Date.now()}_${paymentProofFile.name}`);
                         const uploadResult = await withTimeout(
                             window.firebaseUploadBytes(proofRef, paymentProofFile),
@@ -705,30 +718,37 @@ if (bookingForm) {
                         );
                         bookingData.paymentProofUrl = downloadUrl;
                         bookingData.paymentProofFileName = paymentProofFile.name;
-                    } else {
-                        showMessage('Firebase Storage belum terhubung. Upload bukti pembayaran gagal.', 'error');
-                        return;
+                    } catch (uploadErr) {
+                        console.error('Payment proof upload failed:', uploadErr);
+                        // Fallback: don't block booking save — store an indicator and continue
+                        bookingData.paymentProofFileName = paymentProofFile.name;
+                        bookingData.paymentProofUploadError = String(uploadErr?.message || uploadErr);
+                        showMessage('Upload bukti pembayaran gagal. Booking disimpan tanpa bukti, silakan kirim bukti via WhatsApp.', 'warning');
                     }
+                } else {
+                    console.warn('Firebase Storage not available, proceeding to save booking without proof');
+                    bookingData.paymentProofFileName = paymentProofFile.name;
+                    bookingData.paymentProofUploadError = 'Firebase Storage not available';
+                    showMessage('Firebase Storage belum terhubung. Booking disimpan tanpa bukti pembayaran.', 'warning');
                 }
-
-                const bookingsRef = window.firebaseRef(window.firebaseDatabase, 'bookings');
-                const newBookingRef = window.firebasePush(bookingsRef);
-                await withTimeout(
-                    window.firebaseSet(newBookingRef, bookingData),
-                    25000,
-                    'Menyimpan booking memakan waktu terlalu lama. Silakan coba lagi.'
-                );
-
-                showMessage('Booking berhasil dikirim. Tim akan menghubungi Anda segera.', 'success');
-                e.target.reset();
-                removeSelectedFile();
-                updateServiceMethodUI();
-            } else {
-                showMessage('Firebase belum terhubung. Periksa konfigurasi.', 'error');
             }
+
+            const bookingsRef = window.firebaseRef(window.firebaseDatabase, 'bookings');
+            const newBookingRef = window.firebasePush(bookingsRef);
+            await withTimeout(
+                window.firebaseSet(newBookingRef, bookingData),
+                25000,
+                'Menyimpan booking memakan waktu terlalu lama. Silakan coba lagi.'
+            );
+
+            showMessage('Booking berhasil dikirim. Tim akan menghubungi Anda segera.', 'success');
+            e.target.reset();
+            removeSelectedFile();
+            updateServiceMethodUI();
         } catch (error) {
             console.error('Error during booking submit:', error);
-            showMessage('Terjadi kesalahan. Silakan coba lagi.', 'error');
+            const message = error?.message ? `Terjadi kesalahan: ${error.message}` : 'Terjadi kesalahan. Silakan coba lagi.';
+            showMessage(message, 'error');
         } finally {
             if (submitBtn) {
                 submitBtn.textContent = originalText;
