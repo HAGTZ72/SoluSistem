@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - SoluSistem</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #eef6ff;
+            color: #0f172a;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .admin-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .admin-title {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .admin-title h1 {
+            font-size: 1.75rem;
+            color: #1d4ed8;
+        }
+
+        .admin-title img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .admin-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 14px 10px 36px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            transition: border-color 0.2s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+        }
+
+        .filter-button {
+            padding: 10px 16px;
+            background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            transition: transform 0.2s ease;
+        }
+
+        .filter-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .refresh-btn {
+            padding: 10px 16px;
+            background: #f0f9ff;
+            color: #2563eb;
+            border: 2px solid #2563eb;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .refresh-btn:hover {
+            background: #2563eb;
+            color: white;
+        }
+
+        /* Booking Count */
+        .booking-count {
+            padding: 16px 20px;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(59, 130, 246, 0.06) 100%);
+            border-left: 4px solid #2563eb;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #1d4ed8;
+            font-weight: 500;
+        }
+
+        /* Table Section */
+        .table-section {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+            overflow: hidden;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f8fafc;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        th {
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #1d4ed8;
+            font-size: 0.9rem;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #e2e8f0;
+            transition: background-color 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        td {
+            padding: 12px 16px;
+            font-size: 0.9rem;
+            color: #0f172a;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-confirmed {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-verified {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        /* Status Select */
+        .status-select {
+            padding: 6px 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+            color: #0f172a;
+            cursor: pointer;
+            transition: border-color 0.2s ease;
+        }
+
+        .status-select:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        /* Action Button */
+        .btn-update {
+            padding: 6px 12px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn-update:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        /* Empty State */
+        .empty-state {
+            padding: 40px 20px;
+            text-align: center;
+            color: #64748b;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: #cbd5e1;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .empty-state p {
+            font-size: 1rem;
+        }
+
+        /* Loading State */
+        .loading {
+            padding: 40px 20px;
+            text-align: center;
+            color: #64748b;
+        }
+
+        .loading i {
+            font-size: 2rem;
+            color: #2563eb;
+            animation: spin 1s linear infinite;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Message */
+        .message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 14px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .message.success {
+            background: #22c55e;
+        }
+
+        .message.error {
+            background: #ef4444;
+        }
+
+        .message.hidden {
+            display: none;
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+        }
+
+        .modal.hidden {
+            display: none;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .modal-header h2 {
+            color: #1d4ed8;
+            font-size: 1.25rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #64748b;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .info-row {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #64748b;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .info-value {
+            color: #0f172a;
+            word-break: break-word;
+        }
+
+        .info-value a {
+            color: #2563eb;
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .admin-header {
+                flex-direction: column;
+            }
+
+            .admin-title h1 {
+                font-size: 1.25rem;
+            }
+
+            .admin-controls {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+
+            table {
+                font-size: 0.85rem;
+            }
+
+            th, td {
+                padding: 10px 8px;
+            }
+
+            .status-badge,
+            .status-select {
+                width: 100%;
+            }
+
+            .btn-update {
+                width: 100%;
+            }
+        }
+    </style>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-analytics.js";
+        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAtJbZgCDg6YZlSQLrzaa5qGwR36UBvEJU",
+            authDomain: "solusistem-8adde.firebaseapp.com",
+            databaseURL: "https://solusistem-8adde-default-rtdb.firebaseio.com",
+            projectId: "solusistem-8adde",
+            storageBucket: "solusistem-8adde.appspot.com",
+            messagingSenderId: "36767283107",
+            appId: "1:36767283107:web:8f8e1d78969a498c888c16",
+            measurementId: "G-7RL5Y7VZL6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const database = getDatabase(app);
+
+        // Global variables
+        let allBookings = [];
+        let filteredBookings = [];
+
+        // DOM Elements
+        const bookingTableBody = document.querySelector('tbody');
+        const searchInput = document.getElementById('searchInput');
+        const filterButton = document.getElementById('filterButton');
+        const refreshButton = document.getElementById('refreshButton');
+        const messageContainer = document.getElementById('messageContainer');
+        const bookingCountDisplay = document.getElementById('bookingCount');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const modal = document.getElementById('detailModal');
+        const modalClose = document.getElementById('modalClose');
+
+        // Show message
+        function showMessage(message, type) {
+            const div = document.createElement('div');
+            div.className = `message ${type}`;
+            div.textContent = message;
+            messageContainer.appendChild(div);
+
+            setTimeout(() => {
+                div.classList.add('hidden');
+                setTimeout(() => div.remove(), 300);
+            }, 4000);
+        }
+
+        // Format date
+        function formatDate(isoString) {
+            const date = new Date(isoString);
+            return date.toLocaleDateString('id-ID', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Get status badge class
+        function getStatusClass(status) {
+            switch (status) {
+                case 'Belum Dikonfirmasi':
+                    return 'status-pending';
+                case 'Sudah Dibayar':
+                    return 'status-confirmed';
+                case 'Terverifikasi':
+                    return 'status-verified';
+                default:
+                    return 'status-pending';
+            }
+        }
+
+        // Render bookings table
+        function renderTable(bookings) {
+            if (bookings.length === 0) {
+                bookingTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <p>Tidak ada booking ditemukan</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            bookingTableBody.innerHTML = bookings.map(booking => `
+                <tr>
+                    <td><strong>${booking.nama}</strong></td>
+                    <td>${booking.phone}</td>
+                    <td>${booking.service}</td>
+                    <td>
+                        <span>${booking.serviceMethod === 'online' ? 'Online' : 'Offline'}</span>
+                        ${booking.paymentMethod ? `<br><small style="color: #64748b;">${booking.paymentMethod.toUpperCase()}</small>` : ''}
+                    </td>
+                    <td>${formatDate(booking.timestamp)}</td>
+                    <td>
+                        ${booking.serviceMethod === 'online' ? `
+                            <select class="status-select" data-booking-id="${booking.id}">
+                                <option value="Belum Dikonfirmasi" ${booking.paymentStatus === 'Belum Dikonfirmasi' ? 'selected' : ''}>Belum Dikonfirmasi</option>
+                                <option value="Sudah Dibayar" ${booking.paymentStatus === 'Sudah Dibayar' ? 'selected' : ''}>Sudah Dibayar</option>
+                                <option value="Terverifikasi" ${booking.paymentStatus === 'Terverifikasi' ? 'selected' : ''}>Terverifikasi</option>
+                            </select>
+                        ` : `
+                            <span class="status-badge status-pending">-</span>
+                        `}
+                    </td>
+                    <td>
+                        <button class="btn-update" data-booking-id="${booking.id}">Detail</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Add event listeners
+            document.querySelectorAll('.status-select').forEach(select => {
+                select.addEventListener('change', (e) => updatePaymentStatus(e.target.dataset.bookingId, e.target.value));
+            });
+
+            document.querySelectorAll('.btn-update').forEach(btn => {
+                btn.addEventListener('click', (e) => showBookingDetail(e.target.dataset.bookingId));
+            });
+        }
+
+        // Update payment status
+        function updatePaymentStatus(bookingId, newStatus) {
+            const booking = allBookings.find(b => b.id === bookingId);
+            if (!booking) return;
+
+            const bookingRef = ref(database, `bookings/${bookingId}`);
+            update(bookingRef, { paymentStatus: newStatus })
+                .then(() => {
+                    booking.paymentStatus = newStatus;
+                    showMessage(`Status pembayaran diperbarui menjadi "${newStatus}"`, 'success');
+                    renderTable(filteredBookings);
+                })
+                .catch(error => {
+                    showMessage(`Gagal memperbarui status: ${error.message}`, 'error');
+                });
+        }
+
+        // Show booking detail
+        function showBookingDetail(bookingId) {
+            const booking = allBookings.find(b => b.id === bookingId);
+            if (!booking) return;
+
+            const modalBody = modal.querySelector('.modal-body');
+            modalBody.innerHTML = `
+                <div class="info-row">
+                    <div class="info-label">Nama</div>
+                    <div class="info-value">${booking.nama}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Nomor HP</div>
+                    <div class="info-value"><a href="https://wa.me/62${booking.phone.replace(/^0/, '')}" target="_blank">${booking.phone}</a></div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Layanan</div>
+                    <div class="info-value">${booking.service}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Metode</div>
+                    <div class="info-value">${booking.serviceMethod === 'online' ? 'Online (Video Call/Chat)' : 'Offline (Kunjungan)'}</div>
+                </div>
+                ${booking.paymentMethod ? `
+                <div class="info-row">
+                    <div class="info-label">Pembayaran</div>
+                    <div class="info-value">${booking.paymentMethod.toUpperCase()}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Status Pembayaran</div>
+                    <div class="info-value">
+                        <span class="status-badge ${getStatusClass(booking.paymentStatus)}">${booking.paymentStatus}</span>
+                    </div>
+                </div>
+                ` : ''}
+                ${booking.keluhan ? `
+                <div class="info-row">
+                    <div class="info-label">Keluhan</div>
+                    <div class="info-value">${booking.keluhan}</div>
+                </div>
+                ` : ''}
+                ${booking.alamat ? `
+                <div class="info-row">
+                    <div class="info-label">Alamat</div>
+                    <div class="info-value">${booking.alamat}</div>
+                </div>
+                ` : ''}
+                ${booking.gmapsLink ? `
+                <div class="info-row">
+                    <div class="info-label">Lokasi</div>
+                    <div class="info-value"><a href="${booking.gmapsLink}" target="_blank">Buka Google Maps</a></div>
+                </div>
+                ` : ''}
+                <div class="info-row">
+                    <div class="info-label">Tanggal</div>
+                    <div class="info-value">${formatDate(booking.timestamp)}</div>
+                </div>
+            `;
+
+            modal.classList.remove('hidden');
+        }
+
+        // Filter bookings
+        function filterBookings() {
+            const query = searchInput.value.toLowerCase();
+            filteredBookings = allBookings.filter(booking => {
+                const searchFields = [
+                    booking.nama,
+                    booking.phone,
+                    booking.service,
+                    booking.serviceMethod,
+                    booking.paymentStatus
+                ];
+                return searchFields.some(field => field && field.toLowerCase().includes(query));
+            });
+            renderTable(filteredBookings);
+            updateBookingCount();
+        }
+
+        // Update booking count
+        function updateBookingCount() {
+            bookingCountDisplay.textContent = `Total Booking: ${filteredBookings.length} dari ${allBookings.length}`;
+        }
+
+        // Load bookings from Firebase
+        function loadBookings() {
+            loadingIndicator.classList.remove('hidden');
+            const bookingsRef = ref(database, 'bookings');
+            
+            onValue(bookingsRef, (snapshot) => {
+                allBookings = [];
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    Object.entries(data).forEach(([key, value]) => {
+                        allBookings.push({
+                            id: key,
+                            ...value,
+                            paymentStatus: value.paymentStatus || 'Belum Dikonfirmasi'
+                        });
+                    });
+                }
+                // Sort by timestamp (newest first)
+                allBookings.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                filteredBookings = [...allBookings];
+                renderTable(filteredBookings);
+                updateBookingCount();
+                loadingIndicator.classList.add('hidden');
+            }, (error) => {
+                loadingIndicator.classList.add('hidden');
+                showMessage(`Error: ${error.message}`, 'error');
+            });
+        }
+
+        // Event listeners
+        searchInput.addEventListener('input', filterBookings);
+        filterButton.addEventListener('click', filterBookings);
+        refreshButton.addEventListener('click', loadBookings);
+        modalClose.addEventListener('click', () => modal.classList.add('hidden'));
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.add('hidden');
+        });
+
+        // Initial load
+        loadBookings();
+    </script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="admin-header">
+            <div class="admin-title">
+                <img src="assets/Logo SoluSistem.jpeg" alt="SoluSistem Logo">
+                <div>
+                    <h1>Admin Dashboard</h1>
+                    <p style="color: #64748b; font-size: 0.9rem;">Kelola booking dan verifikasi pembayaran</p>
+                </div>
+            </div>
+            <div class="admin-controls">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Cari nama, nomor HP, atau layanan...">
+                </div>
+                <button class="filter-button" id="filterButton">
+                    <i class="fas fa-filter"></i> Filter
+                </button>
+                <button class="refresh-btn" id="refreshButton">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+        </div>
+
+        <!-- Booking Count -->
+        <div class="booking-count" id="bookingCount">Total Booking: 0</div>
+
+        <!-- Table Section -->
+        <div class="table-section">
+            <div id="loadingIndicator" class="loading hidden">
+                <i class="fas fa-spinner"></i>
+                <p>Memuat data...</p>
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nama</th>
+                            <th>Nomor HP</th>
+                            <th>Layanan</th>
+                            <th>Metode</th>
+                            <th>Tanggal</th>
+                            <th>Status Pembayaran</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="7" class="empty-state">
+                                <i class="fas fa-inbox"></i>
+                                <p>Memuat data...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Message Container -->
+    <div id="messageContainer"></div>
+
+    <!-- Detail Modal -->
+    <div id="detailModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Detail Booking</h2>
+                <button type="button" class="modal-close" id="modalClose">×</button>
+            </div>
+            <div class="modal-body"></div>
+        </div>
+    </div>
+</body>
+</html>

@@ -205,6 +205,14 @@ document.querySelectorAll('.service-card, .testimonial-card, .contact-card, .hig
 // Booking form handling with dynamic features
 const bookingForm = document.getElementById('bookingForm');
 if (bookingForm) {
+    // Utility function for timeout handling
+    function withTimeout(promise, timeoutMs, timeoutMessage) {
+        return Promise.race([
+            promise,
+            new Promise((_, reject) => setTimeout(() => reject(new Error(timeoutMessage)), timeoutMs))
+        ]);
+    }
+
     // Get form elements
     const serviceSelect = document.getElementById('service');
     const serviceMethodRadios = document.querySelectorAll('input[name="serviceMethod"]');
@@ -238,6 +246,38 @@ if (bookingForm) {
         'setup-dasar': 180000
     };
 
+    // Service preview data
+    const servicePreviews = {
+        'konsultasi-it': {
+            title: 'Konsultasi IT',
+            image: 'assets/Konsultasi IT.jpg',
+            description: 'Sesi konsultasi jarak jauh untuk membantu penggunaan HP, laptop, dan aplikasi. Termasuk troubleshooting dasar, panduan langkah demi langkah, dan rekomendasi solusi.',
+            examples: ['Panduan penggunaan aplikasi', 'Troubleshooting koneksi WiFi', 'Pengaturan akun dan backup data'],
+            price: 'Mulai dari Rp150.000'
+        },
+        'instalasi-software': {
+            title: 'Instalasi Software',
+            image: 'assets/Instalasi software.jpg',
+            description: 'Pemasangan dan konfigurasi aplikasi penting secara remote atau di lokasi. Kami memastikan software terpasang, terkonfigurasi, dan berjalan stabil.',
+            examples: ['Instal antivirus dan konfigurasi', 'Setup aplikasi kantor', 'Update dan konfigurasi driver'],
+            price: 'Mulai dari Rp200.000'
+        },
+        'perbaikan-ringan': {
+            title: 'Perbaikan Ringan',
+            image: 'assets/Perbaikan ringan.jpg',
+            description: 'Menangani masalah perangkat lunak ringan serta optimasi performa. Cocok untuk perangkat yang lambat atau sering error kecil.',
+            examples: ['Membersihkan file sampah', 'Menghapus aplikasi bermasalah', 'Optimasi startup dan performa'],
+            price: 'Mulai dari Rp250.000'
+        },
+        'setup-dasar': {
+            title: 'Setup Dasar',
+            image: 'assets/Setup dasar.jpg',
+            description: 'Penyiapan awal perangkat dan jaringan: koneksi WiFi, printer, email, dan pengaturan dasar lain agar perangkat siap digunakan.',
+            examples: ['Setup WiFi + password', 'Konfigurasi printer', 'Buat akun email & sinkronisasi'],
+            price: 'Mulai dari Rp180.000'
+        }
+    };
+
     // Update cost estimation
     function updateCostEstimation() {
         const selectedService = serviceSelect.value;
@@ -262,6 +302,54 @@ if (bookingForm) {
         }
 
         costEstimationContent.innerHTML = html;
+        updateServicePreview(selectedService);
+    }
+
+    // Update the interactive service preview
+    const servicePreviewEl = document.getElementById('servicePreview');
+    const previewImageMain = document.getElementById('previewImageMain');
+    const previewTitle = document.getElementById('previewTitle');
+    const previewDescription = document.getElementById('previewDescription');
+    const previewExamples = document.getElementById('previewExamples');
+    const previewPrice = document.getElementById('previewPrice');
+
+    function animatePreviewToggle(show) {
+        if (!servicePreviewEl) return;
+        if (show) {
+            servicePreviewEl.classList.remove('hidden');
+            servicePreviewEl.classList.remove('fade-out');
+            servicePreviewEl.classList.add('fade-in');
+        } else {
+            servicePreviewEl.classList.remove('fade-in');
+            servicePreviewEl.classList.add('fade-out');
+            setTimeout(() => servicePreviewEl.classList.add('hidden'), 300);
+        }
+    }
+
+    function updateServicePreview(serviceKey) {
+        if (!serviceKey) {
+            animatePreviewToggle(false);
+            return;
+        }
+        const data = servicePreviews[serviceKey];
+        if (!data) {
+            animatePreviewToggle(false);
+            return;
+        }
+
+        // Update content with smooth transition
+        animatePreviewToggle(false);
+        setTimeout(() => {
+            if (previewImageMain) previewImageMain.src = data.image;
+            if (previewImageMain) previewImageMain.alt = data.title;
+            if (previewTitle) previewTitle.textContent = data.title;
+            if (previewDescription) previewDescription.textContent = data.description;
+            if (previewExamples) {
+                previewExamples.innerHTML = data.examples.map(item => `<li>${item}</li>`).join('');
+            }
+            if (previewPrice) previewPrice.textContent = data.price;
+            animatePreviewToggle(true);
+        }, 300);
     }
 
     // Toggle visibility based on service method
@@ -275,8 +363,9 @@ if (bookingForm) {
         document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => radio.checked = false);
 
         // Reset file upload for offline method
-        if (selectedMethod === 'offline') {
-            removeSelectedFile();
+// Reset offline method
+            if (selectedMethod === 'offline') {
+                // Clear payment method selection for offline
         }
 
         detailGroup.classList.toggle('hidden', !selectedMethod);
@@ -428,149 +517,6 @@ if (bookingForm) {
         });
     }
 
-    // File upload handling
-    const fileInput = document.getElementById('paymentProof');
-    const filePreview = document.getElementById('filePreview');
-    const fileName = document.getElementById('fileName');
-    const fileError = document.getElementById('fileError');
-    const removeFileBtn = document.getElementById('removeFileBtn');
-    const previewImageWrapper = document.getElementById('previewImageWrapper');
-    const previewImage = document.getElementById('previewImage');
-    let selectedFile = null;
-    let previewImageUrl = '';
-
-    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
-    const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.pdf'];
-
-    function showFileError(message) {
-        fileError.textContent = message;
-        fileError.classList.remove('hidden');
-    }
-
-    function clearFileError() {
-        fileError.textContent = '';
-        fileError.classList.add('hidden');
-    }
-
-    function validateFile(file) {
-        // Check file size
-        if (file.size > MAX_FILE_SIZE) {
-            showFileError('Ukuran file terlalu besar. Maksimal 5MB.');
-            return false;
-        }
-
-        // Check file type
-        if (!ALLOWED_TYPES.includes(file.type)) {
-            showFileError('Tipe file tidak didukung. Gunakan JPG, PNG, atau PDF.');
-            return false;
-        }
-
-        clearFileError();
-        return true;
-    }
-
-    function withTimeout(promise, timeoutMs, timeoutMessage) {
-        return Promise.race([
-            promise,
-            new Promise((_, reject) => setTimeout(() => reject(new Error(timeoutMessage)), timeoutMs))
-        ]);
-    }
-
-    function displayFilePreview(file) {
-        fileName.textContent = file.name;
-        if (file.type.startsWith('image/') && previewImage && previewImageWrapper) {
-            if (previewImageUrl) {
-                URL.revokeObjectURL(previewImageUrl);
-            }
-            previewImageUrl = URL.createObjectURL(file);
-            previewImage.src = previewImageUrl;
-            previewImage.alt = `Pratinjau ${file.name}`;
-            previewImageWrapper.classList.remove('hidden');
-        } else if (previewImageWrapper) {
-            previewImageWrapper.classList.add('hidden');
-        }
-        filePreview.classList.remove('hidden');
-        selectedFile = file;
-    }
-
-    function removeSelectedFile() {
-        if (previewImageUrl) {
-            URL.revokeObjectURL(previewImageUrl);
-            previewImageUrl = '';
-        }
-        fileInput.value = '';
-        selectedFile = null;
-        filePreview.classList.add('hidden');
-        if (previewImageWrapper) {
-            previewImageWrapper.classList.add('hidden');
-        }
-        clearFileError();
-    }
-
-    if (fileInput) {
-        // Handle file selection via click
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file && validateFile(file)) {
-                displayFilePreview(file);
-            } else if (e.target.files[0]) {
-                fileInput.value = '';
-                selectedFile = null;
-            }
-        });
-
-        // Handle drag and drop
-        const fileUploadLabel = document.querySelector('.file-upload-label');
-        if (fileUploadLabel) {
-            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                fileUploadLabel.addEventListener(eventName, (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                });
-
-                document.body.addEventListener(eventName, (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                });
-            });
-
-            ['dragenter', 'dragover'].forEach(eventName => {
-                fileUploadLabel.addEventListener(eventName, () => {
-                    fileUploadLabel.style.background = 'linear-gradient(135deg, rgba(37, 99, 235, 0.15) 0%, rgba(59, 130, 246, 0.12) 100%)';
-                    fileUploadLabel.style.borderColor = '#1d4ed8';
-                });
-            });
-
-            ['dragleave', 'drop'].forEach(eventName => {
-                fileUploadLabel.addEventListener(eventName, () => {
-                    fileUploadLabel.style.background = 'linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(59, 130, 246, 0.06) 100%)';
-                    fileUploadLabel.style.borderColor = '#2563eb';
-                });
-            });
-
-            fileUploadLabel.addEventListener('drop', (e) => {
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    const file = files[0];
-                    if (validateFile(file)) {
-                        const dt = new DataTransfer();
-                        dt.items.add(file);
-                        fileInput.files = dt.files;
-                        displayFilePreview(file);
-                    }
-                }
-            });
-        }
-
-        if (removeFileBtn) {
-            removeFileBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                removeSelectedFile();
-            });
-        }
-    }
-
     // Event listeners
     serviceSelect.addEventListener('change', updateCostEstimation);
 
@@ -605,7 +551,6 @@ if (bookingForm) {
             const keluhan = (formData.get('keluhan') || '').trim();
             const serviceMethod = (formData.get('serviceMethod') || '').trim();
             const paymentMethod = (formData.get('paymentMethod') || '').trim();
-            const paymentProofFile = fileInput?.files?.[0] || selectedFile || null;
 
             // Validate required fields
             const nameInput = document.getElementById('nama');
@@ -655,17 +600,6 @@ if (bookingForm) {
                 return;
             }
 
-            // Validate payment proof for online method
-            if (serviceMethod === 'online' && !paymentProofFile) {
-                showFileError('Upload bukti pembayaran diperlukan.');
-                showMessage('Untuk layanan Online, upload bukti pembayaran Anda.', 'error');
-                return;
-            }
-
-            if (serviceMethod === 'online' && paymentProofFile && !validateFile(paymentProofFile)) {
-                return;
-            }
-
             clearGroupError(serviceMethodGroup);
             clearGroupError(paymentMethodGroup);
 
@@ -676,6 +610,7 @@ if (bookingForm) {
                 service,
                 keluhan,
                 serviceMethod,
+                paymentStatus: 'Belum Dikonfirmasi',
                 timestamp: new Date().toISOString()
             };
 
@@ -686,51 +621,11 @@ if (bookingForm) {
             } else {
                 bookingData.alamatOnline = (formData.get('alamatOnline') || '').trim();
                 bookingData.paymentMethod = paymentMethod;
-                bookingData.paymentProofFileName = paymentProofFile?.name || '';
             }
 
             if (typeof window.firebaseDatabase === 'undefined' || typeof window.firebaseRef !== 'function' || typeof window.firebasePush !== 'function' || typeof window.firebaseSet !== 'function') {
                 showMessage('Firebase belum siap. Tunggu beberapa detik lalu coba lagi.', 'error');
                 return;
-            }
-
-            if (serviceMethod === 'online' && paymentProofFile) {
-                console.log('Debug: attempting payment proof upload', {
-                    firebaseStorage: window.firebaseStorage,
-                    firebaseStorageRef: typeof window.firebaseStorageRef,
-                    fileName: paymentProofFile.name,
-                    fileType: paymentProofFile.type,
-                    fileSize: paymentProofFile.size
-                });
-
-                if (typeof window.firebaseStorage !== 'undefined' && typeof window.firebaseStorageRef === 'function') {
-                    try {
-                        const proofRef = window.firebaseStorageRef(window.firebaseStorage, `paymentProofs/${Date.now()}_${paymentProofFile.name}`);
-                        const uploadResult = await withTimeout(
-                            window.firebaseUploadBytes(proofRef, paymentProofFile),
-                            25000,
-                            'Upload bukti pembayaran memakan waktu terlalu lama. Silakan coba lagi.'
-                        );
-                        const downloadUrl = await withTimeout(
-                            window.firebaseGetDownloadURL(uploadResult.ref),
-                            20000,
-                            'Mengambil URL bukti pembayaran gagal karena waktu habis.'
-                        );
-                        bookingData.paymentProofUrl = downloadUrl;
-                        bookingData.paymentProofFileName = paymentProofFile.name;
-                    } catch (uploadErr) {
-                        console.error('Payment proof upload failed:', uploadErr);
-                        // Fallback: don't block booking save — store an indicator and continue
-                        bookingData.paymentProofFileName = paymentProofFile.name;
-                        bookingData.paymentProofUploadError = String(uploadErr?.message || uploadErr);
-                        showMessage('Upload bukti pembayaran gagal. Booking disimpan tanpa bukti, silakan kirim bukti via WhatsApp.', 'warning');
-                    }
-                } else {
-                    console.warn('Firebase Storage not available, proceeding to save booking without proof');
-                    bookingData.paymentProofFileName = paymentProofFile.name;
-                    bookingData.paymentProofUploadError = 'Firebase Storage not available';
-                    showMessage('Firebase Storage belum terhubung. Booking disimpan tanpa bukti pembayaran.', 'warning');
-                }
             }
 
             const bookingsRef = window.firebaseRef(window.firebaseDatabase, 'bookings');
@@ -741,9 +636,14 @@ if (bookingForm) {
                 'Menyimpan booking memakan waktu terlalu lama. Silakan coba lagi.'
             );
 
-            showMessage('Booking berhasil dikirim. Tim akan menghubungi Anda segera.', 'success');
+            // Show success message with specific message for online payment
+            if (serviceMethod === 'online') {
+                showMessage(`Booking berhasil dikirim! Pembayaran akan diverifikasi secara manual oleh admin melalui WhatsApp. Admin akan menghubungi Anda di ${phone} untuk mengkonfirmasi pembayaran Anda.`, 'success');
+            } else {
+                showMessage('Booking berhasil dikirim. Tim akan menghubungi Anda segera.', 'success');
+            }
+            
             e.target.reset();
-            removeSelectedFile();
             updateServiceMethodUI();
         } catch (error) {
             console.error('Error during booking submit:', error);
